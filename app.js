@@ -1,5 +1,5 @@
 /* ==========================================================================
-   S.W.A.N. // SYSTEM CORE LOGIC v3.2
+   S.W.A.N. // SYSTEM CORE LOGIC v4.0 [RESPONSIVE]
    ========================================================================== */
 
 const State = {
@@ -21,10 +21,86 @@ const State = {
     table: null
 };
 
-// --- INIT ---
+// --- SYSTEM INITIALIZATION ---
 $(document).ready(() => {
 
-    // Listeners
+    // 1. BOOT SEQUENCE ANIMATION
+    const bootLines = [
+        "SYSTEM_CHECK...",
+        "LOADING DRIVERS...",
+        "DECRYPTING BIO-DATA...",
+        "OPTIMIZING VIEWPORT...",
+        "ESTABLISHING UPLINK...",
+        "ACCESS GRANTED."
+    ];
+    let lineIndex = 0;
+    const bootInterval = setInterval(() => {
+        if (lineIndex < bootLines.length) {
+            $('#boot-log').append(`<div>> ${bootLines[lineIndex]}</div>`);
+            // Auto scroll to bottom of log
+            const log = document.getElementById('boot-log');
+            log.scrollTop = log.scrollHeight;
+            lineIndex++;
+        } else {
+            clearInterval(bootInterval);
+        }
+    }, 300);
+
+    // 2. MOBILE MENU LOGIC
+    const $sidebar = $('.sidebar');
+    const $menuBtn = $('#mobile-menu-btn');
+
+    // Toggle Sidebar
+    $menuBtn.on('click', function (e) {
+        e.stopPropagation();
+        $sidebar.toggleClass('active');
+
+        if ($sidebar.hasClass('active')) {
+            $(this).text("✖ CLOSE SYS");
+            $(this).css('border-color', 'var(--alert)');
+            $(this).css('color', 'var(--alert)');
+        } else {
+            $(this).text("☰ SYS.MENU");
+            $(this).css('border-color', 'var(--primary)');
+            $(this).css('color', 'var(--primary)');
+        }
+    });
+
+    // Close sidebar when clicking outside
+    $(document).on('click', function (e) {
+        if ($(window).width() <= 768 &&
+            $sidebar.hasClass('active') &&
+            !$(e.target).closest('.sidebar').length &&
+            !$(e.target).is($menuBtn)) {
+
+            $sidebar.removeClass('active');
+            $menuBtn.text("☰ SYS.MENU");
+            $menuBtn.css('border-color', 'var(--primary)');
+            $menuBtn.css('color', 'var(--primary)');
+        }
+    });
+
+    // Reset state on resize
+    $(window).resize(function () {
+        if ($(window).width() > 768) {
+            $sidebar.removeClass('active');
+            $menuBtn.hide();
+        } else {
+            $menuBtn.show();
+        }
+    });
+
+    // 3. RESPONSIVE CHART RESIZING
+    window.addEventListener('resize', function () {
+        const update = { autosize: true };
+        // Relayout all charts if they exist
+        if (document.getElementById('main-scatter').data) Plotly.relayout('main-scatter', update);
+        if (document.getElementById('box-plot').data) Plotly.relayout('box-plot', update);
+        if (document.getElementById('hist-plot').data) Plotly.relayout('hist-plot', update);
+        if (document.getElementById('radar-container').data) Plotly.relayout('radar-container', update);
+    });
+
+    // 4. DATA INPUT LISTENERS
     $('#csv-file').on('change', handleFileUpload);
     $('#search-input').on('keyup', updateDashboard);
     $('#star-slider').on('input', function () {
@@ -33,17 +109,19 @@ $(document).ready(() => {
     });
     $('#element-select').on('change', updateDashboard);
 
-    // Auto-load
+    // 5. AUTO-LOAD DATASET
     if (typeof MONSTER_DATA_CSV !== 'undefined') {
         Papa.parse(MONSTER_DATA_CSV, {
             header: true, skipEmptyLines: true,
             complete: (res) => {
                 processRawData(res.data);
-                setTimeout(() => $('#loader').fadeOut(500), 800);
+                // Delay fadeout to show off the boot sequence
+                setTimeout(() => $('#loader').fadeOut(500), 2500);
             }
         });
     } else {
-        $('#loader').html('<div style="color:var(--primary)">WAITING FOR DATA...<br><small>Please upload CSV</small></div>');
+        $('#boot-log').append('<div style="color:var(--alert)">> ERROR: NO LOCAL DATA FOUND.</div>');
+        setTimeout(() => $('#loader').fadeOut(500), 2000);
     }
 });
 
@@ -53,7 +131,7 @@ function handleFileUpload(e) {
     Papa.parse(file, { header: true, skipEmptyLines: true, complete: (res) => processRawData(res.data) });
 }
 
-// --- CORE PROCESSING ---
+// --- DATA PROCESSING ENGINE ---
 function processRawData(data) {
     // 1. Basic Parse
     const clean = data.filter(d => d.Name && d.HP).map(d => ({
@@ -64,7 +142,7 @@ function processRawData(data) {
 
     if (clean.length < 2) return;
 
-    // 2. Statistics (Mean/StdDev)
+    // 2. Global Statistics
     ['HP', 'Atk', 'Def', 'Spd'].forEach(k => {
         const arr = clean.map(d => d[k]);
         const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
@@ -72,7 +150,7 @@ function processRawData(data) {
         State.stats[k.toLowerCase()] = { mean, std };
     });
 
-    // 3. Min/Max Ranges (For TBP normalization)
+    // 3. Min/Max Ranges
     const baseRanges = {
         hp: { min: Math.min(...clean.map(d => d.HP)), max: Math.max(...clean.map(d => d.HP)) },
         atk: { min: Math.min(...clean.map(d => d.Atk)), max: Math.max(...clean.map(d => d.Atk)) },
@@ -80,7 +158,7 @@ function processRawData(data) {
         spd: { min: Math.min(...clean.map(d => d.Spd)), max: Math.max(...clean.map(d => d.Spd)) }
     };
 
-    // 4. Calculate Metrics for ALL entities
+    // 4. Calculate Metrics & Roles
     let processed = clean.map(d => {
         // Z-Scores
         const z_hp = (d.HP - State.stats.hp.mean) / State.stats.hp.std;
@@ -88,22 +166,22 @@ function processRawData(data) {
         const z_def = (d.Def - State.stats.def.mean) / State.stats.def.std;
         const z_spd = (d.Spd - State.stats.spd.mean) / State.stats.spd.std;
 
-        // EHP
+        // EHP & TBP
         const ehp = d.HP * ((1000 + (3.5 * d.Def)) / 1000);
 
-        // TBP (Total Base Potential)
         const norm_hp = (d.HP - baseRanges.hp.min) / (baseRanges.hp.max - baseRanges.hp.min);
         const norm_atk = (d.Atk - baseRanges.atk.min) / (baseRanges.atk.max - baseRanges.atk.min);
         const norm_def = (d.Def - baseRanges.def.min) / (baseRanges.def.max - baseRanges.def.min);
         const norm_spd = (d.Spd - baseRanges.spd.min) / (baseRanges.spd.max - baseRanges.spd.min);
         const tbp = ((norm_hp + norm_atk + norm_def + norm_spd) / 4) * 100;
 
-        // Archetype Calculation
+        // Archetype Logic
         const rAtk = d.Atk / State.stats.atk.mean;
         const rDef = d.Def / State.stats.def.mean;
         const rHp = d.HP / State.stats.hp.mean;
         const rSpd = d.Spd / State.stats.spd.mean;
         const statBias = rAtk - rDef;
+
         const IS_OFFENSIVE = statBias >= 0.1;
         const IS_DEFENSIVE = statBias <= -0.1;
         const IS_FAST = rSpd >= 1.05;
@@ -118,14 +196,13 @@ function processRawData(data) {
         return { ...d, z_hp, z_atk, z_def, z_spd, ehp, tbp, archetype };
     });
 
-    // 5. SORT BY TBP DESCENDING & ASSIGN GLOBAL RANK
-    processed.sort((a, b) => b.tbp - a.tbp);
-
+    // 5. SORT & RANK (Crucial for Leaderboard)
+    processed.sort((a, b) => b.tbp - a.tbp); // Sort Descending by TBP
     processed.forEach((d, index) => {
-        d.globalRank = index + 1;
+        d.globalRank = index + 1; // Assign Rank #1 to Highest TBP
     });
 
-    // 6. Capture Final Global Ranges
+    // 6. Capture Final Ranges
     const ehpArr = processed.map(d => d.ehp);
     const tbpArr = processed.map(d => d.tbp);
 
@@ -143,16 +220,16 @@ function processRawData(data) {
     updateDashboard();
 }
 
-// --- COLORING HELPERS ---
+// --- VISUAL HELPER FUNCTIONS ---
 function getTierColor(val, type) {
     const range = State.ranges[type];
     if (!range) return '#fff';
     const span = range.max - range.min;
     const lowThreshold = range.min + (span * 0.33);
     const highThreshold = range.min + (span * 0.66);
-    if (val >= highThreshold) return '#00ff9d'; // High
-    if (val >= lowThreshold) return '#e0e6ed'; // Mid
-    return '#5a6572';                           // Low
+    if (val >= highThreshold) return '#00ff9d'; // High (Green)
+    if (val >= lowThreshold) return '#e0e6ed'; // Mid (White)
+    return '#5a6572';                           // Low (Grey)
 }
 
 function getRoleColor(role) {
@@ -167,22 +244,25 @@ function getRoleColor(role) {
 
 // --- UI MANAGERS ---
 function initUI() {
+    // Populate Select
     const elements = [...new Set(State.rawData.map(d => d.Element))].sort();
     const $sel = $('#element-select').empty();
     elements.forEach(e => $sel.append(`<option value="${e}" selected>${e}</option>`));
 
     if (State.table) State.table.destroy();
 
-    // Initialize DataTables
+    // Init DataTable
     State.table = $('#data-table').DataTable({
         data: [],
         columns: [
+            // Column 0: Global Rank
             {
                 data: 'globalRank',
                 render: (data) => `<span style="color:var(--text-dim); font-family:var(--font-mono)">#${data}</span>`,
                 width: '50px',
                 type: 'num'
             },
+            // Column 1: Name
             {
                 data: null,
                 render: (d, t, r) => (r.ImageURL ? `<img src="${r.ImageURL}" class="table-icon">` : '') + r.Name,
@@ -200,11 +280,10 @@ function initUI() {
         pageLength: 50,
         dom: 't',
         paging: false,
-        // REMOVED scrollY and scrollCollapse to let CSS handle the scrolling
-        order: [[0, 'asc']]
+        // Removed scrollY to let CSS handle scrolling (avoids double scrollbars)
+        order: [[0, 'asc']] // Default sort by Rank (Top TBP First)
     });
 
-    // Row Click Event
     $('#data-table tbody').on('click', 'tr', function () {
         const data = State.table.row(this).data();
         if (data) renderInspector(data);
@@ -216,29 +295,23 @@ function updateDashboard() {
     const minStars = parseInt($('#star-slider').val());
     const selectedElm = $('#element-select').val() || [];
 
-    // Filter logic
     const filtered = State.rawData.filter(d =>
         (d.Name.toLowerCase().includes(search) || d.Family.toLowerCase().includes(search)) &&
         d.Stars >= minStars && selectedElm.includes(d.Element)
     );
 
-    // KPI Updates
     $('#kpi-count').text(filtered.length);
     const avgTbp = filtered.length ? filtered.reduce((a, b) => a + b.tbp, 0) / filtered.length : 0;
     $('#kpi-ehp').text(avgTbp.toFixed(1) + '%');
 
-    // Update Table
     State.table.clear().rows.add(filtered).draw();
-
-    // Update Charts
     renderScatter(filtered);
     renderDistributions(filtered);
 
-    // Auto-select first result
     if (filtered.length > 0) renderInspector(filtered[0]);
 }
 
-// --- VISUALIZATIONS ---
+// --- PLOTLY CHARTS ---
 const PLOT_OPTS = {
     plot_bgcolor: 'transparent', paper_bgcolor: 'transparent',
     font: { family: 'Roboto Mono', color: '#5a6572', size: 10 },
@@ -304,7 +377,6 @@ function renderInspector(mob) {
                 </div>
             </div>
             
-            <!-- UPDATED: Added 'chart-container' class here -->
             <div class="analysis-container">
                 <div id="radar-container" class="chart-container"></div>
             </div>
@@ -333,8 +405,7 @@ function renderInspector(mob) {
         fill: 'toself', fillcolor: 'rgba(0, 243, 255, 0.2)',
         line: { color: '#00f3ff', width: 2 }, marker: { size: 4, color: '#fff' }
     }], {
-        // UPDATED: Added autosize and adjusted margins
-        autosize: true,
+        autosize: true, // Key for responsiveness
         polar: {
             radialaxis: { visible: false, range: [0, 8] },
             bgcolor: 'rgba(0,0,0,0)',
@@ -343,7 +414,7 @@ function renderInspector(mob) {
         },
         paper_bgcolor: 'transparent',
         plot_bgcolor: 'transparent',
-        margin: { t: 20, b: 20, l: 30, r: 30 }, // Slightly looser margins preventing clip
+        margin: { t: 20, b: 20, l: 30, r: 30 },
         showlegend: false
     }, { responsive: true, displayModeBar: false, staticPlot: true });
 }
