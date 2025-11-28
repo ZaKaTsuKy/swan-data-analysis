@@ -419,6 +419,66 @@ function renderInspector(mob) {
         margin: { t: 20, b: 20, l: 30, r: 30 },
         showlegend: false
     }, { responsive: true, displayModeBar: false, staticPlot: true });
+
+    // 1. Calculate Averages for this Rarity (The "Ghost" Data)
+    // Filter all units that have the same Star rating as the selected mob
+    const peers = State.rawData.filter(d => d.Stars === mob.Stars);
+
+    const avgStats = {
+        hp: peers.reduce((a, b) => a + b.z_hp, 0) / peers.length,
+        atk: peers.reduce((a, b) => a + b.z_atk, 0) / peers.length,
+        def: peers.reduce((a, b) => a + b.z_def, 0) / peers.length,
+        spd: peers.reduce((a, b) => a + b.z_spd, 0) / peers.length
+    };
+
+    // 2. Prepare Data Traces
+    const rDataMob = [mob.z_hp + 4, mob.z_atk + 4, mob.z_def + 4, mob.z_spd + 4, mob.z_hp + 4];
+    const rDataAvg = [avgStats.hp + 4, avgStats.atk + 4, avgStats.def + 4, avgStats.spd + 4, avgStats.hp + 4];
+
+    // Trace 1: The Selected Unit (Solid, Bright)
+    const traceMob = {
+        type: 'scatterpolar',
+        r: rDataMob,
+        theta: ['HP', 'ATK', 'DEF', 'SPD', 'HP'],
+        fill: 'toself',
+        fillcolor: 'rgba(0, 243, 255, 0.2)',
+        line: { color: '#00f3ff', width: 2 },
+        marker: { size: 4, color: '#fff' },
+        name: mob.Name
+    };
+
+    // Trace 2: The Average Ghost (Dashed, Faint)
+    const traceAvg = {
+        type: 'scatterpolar',
+        r: rDataAvg,
+        theta: ['HP', 'ATK', 'DEF', 'SPD', 'HP'],
+        fill: 'toself',
+        fillcolor: 'rgba(255, 255, 255, 0.05)',
+        line: { color: '#999', width: 1, dash: 'dot' },
+        marker: { size: 0 },
+        name: `Avg ${mob.Stars}★`,
+        hoverinfo: 'none' // Don't show tooltip for the ghost
+    };
+
+    Plotly.newPlot('radar-container', [traceAvg, traceMob], {
+        autosize: true,
+        polar: {
+            radialaxis: { visible: false, range: [0, 8] },
+            bgcolor: 'rgba(0,0,0,0)',
+            angularaxis: {
+                tickcolor: 'rgba(255,255,255,0.5)',
+                color: '#fff',
+                size: 10,
+                font: { family: 'Orbitron', size: 10 }
+            },
+            gridshape: 'linear',
+            gridcolor: 'rgba(255,255,255,0.1)'
+        },
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        margin: { t: 20, b: 20, l: 30, r: 30 },
+        showlegend: false // Keep it clean
+    }, { responsive: true, displayModeBar: false, staticPlot: false });
 }
 
 window.switchTab = function (tabId) {
@@ -629,6 +689,59 @@ function renderAdvancedCharts(data) {
     };
 
     Plotly.react('pca-plot', [pcaTrace], pcaLayout, { responsive: true, displayModeBar: false });
+
+    // --- 5. TAXONOMY SUNBURST ---
+    // We need to structure data: Root -> Element -> Archetype
+
+    // 1. Group Data
+    const hierarchy = {};
+    data.forEach(d => {
+        if (!hierarchy[d.Element]) hierarchy[d.Element] = {};
+        if (!hierarchy[d.Element][d.archetype]) hierarchy[d.Element][d.archetype] = 0;
+        hierarchy[d.Element][d.archetype]++;
+    });
+
+    // 2. Flatten for Plotly
+    // Plotly Sunburst needs: labels, parents, values
+    const labels = ["TOTAL"];
+    const parents = [""];
+    const values = [data.length];
+
+    // Level 1: Elements
+    Object.keys(hierarchy).forEach(elm => {
+        labels.push(elm);
+        parents.push("TOTAL");
+        // Sum children for value
+        const totalInElm = Object.values(hierarchy[elm]).reduce((a, b) => a + b, 0);
+        values.push(totalInElm);
+
+        // Level 2: Archetypes
+        Object.keys(hierarchy[elm]).forEach(arch => {
+            labels.push(`${arch} (${elm})`); // Unique ID
+            parents.push(elm);
+            values.push(hierarchy[elm][arch]);
+        });
+    });
+
+    const sunTrace = {
+        type: "sunburst",
+        labels: labels,
+        parents: parents,
+        values: values,
+        leaf: { opacity: 0.4 },
+        marker: { line: { width: 2, color: '#000' } },
+        branchvalues: 'total',
+        hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>Ratio: %{percentRoot:.1%}<extra></extra>',
+        textfont: { family: 'Orbitron', size: 10, color: '#fff' }
+    };
+
+    const sunLayout = {
+        ...PLOT_OPTS,
+        margin: { t: 0, b: 0, l: 0, r: 0 },
+        sunburstcolorway: ['#8c8c12ff', '#9e74aeff', '#ff0055', '#bc13fe', '#146eb3ff'] // Cyberpunk Palette
+    };
+
+    Plotly.react('sunburst-plot', [sunTrace], sunLayout, { responsive: true, displayModeBar: false });
 }
 
 // --- HELPER: LINEAR REGRESSION ENGINE ---
@@ -844,3 +957,51 @@ function performKMeans(data, k = 4) {
 
     return data.map((d, i) => ({ ...d, aiCluster: clusters[i] }));
 }
+
+// --- UNIVERSAL FULLSCREEN TOGGLE ---
+window.toggleCardFullscreen = function (btn) {
+    // 1. Find the parent card
+    const card = $(btn).closest('.cyber-card');
+
+    // 2. Toggle State
+    card.toggleClass('fullscreen');
+    const isFullscreen = card.hasClass('fullscreen');
+
+    // 3. Update Button Icon & Style
+    if (isFullscreen) {
+        $(btn).text('✖'); // Close Icon
+        $(btn).css({ color: 'var(--alert)', borderColor: 'var(--alert)' });
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    } else {
+        $(btn).text('⛶'); // Expand Icon
+        $(btn).css({ color: '', borderColor: '' }); // Reset to CSS default
+        $('body').css('overflow', 'auto'); // Restore background scroll
+    }
+
+    // 4. TRIGGER RESIZES (Critical for Charts & Tables)
+    setTimeout(() => {
+        // A. Resize Plotly Charts
+        card.find('.chart-container').each(function () {
+            Plotly.Plots.resize(this);
+        });
+
+        // B. Resize DataTables (if visible)
+        if (State.table) {
+            State.table.columns.adjust().draw();
+        }
+    }, 150); // Small delay for transition
+};
+
+// Global ESC Key Listener to close all fullscreens
+$(document).keydown(function (e) {
+    if (e.key === "Escape") {
+        const openCards = $('.cyber-card.fullscreen');
+        if (openCards.length > 0) {
+            openCards.each(function () {
+                // Find the button inside this card and click it to toggle back
+                const btn = $(this).find('.fs-btn');
+                toggleCardFullscreen(btn);
+            });
+        }
+    }
+});
