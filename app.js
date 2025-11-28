@@ -987,9 +987,13 @@ window.toggleCardFullscreen = function (btn) {
 
         // B. Resize DataTables (if visible)
         if (State.table) {
+            // FIX: Force the table to reset its width to the container's width
+            // BEFORE calculating column sizes. This prevents the "Crop" bug.
+            $('#data-table').css('width', '100%');
+
             State.table.columns.adjust().draw();
         }
-    }, 150); // Small delay for transition
+    }, 200); // Increased delay slightly to ensure CSS transition is finished
 };
 
 // Global ESC Key Listener to close all fullscreens
