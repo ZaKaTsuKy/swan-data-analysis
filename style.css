@@ -840,3 +840,104 @@ body {
         min-width: 600px;
     }
 }
+
+/* =========================================
+   UNIVERSAL FULLSCREEN SYSTEM
+   ========================================= */
+
+/* 1. The Card Container */
+.cyber-card.fullscreen {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    /* Above Loader (2000) and Menu (1001) */
+    background: var(--bg-dark);
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. The Header in Fullscreen */
+.cyber-card.fullscreen .card-header {
+    background: rgba(0, 243, 255, 0.05);
+    border-bottom: 2px solid var(--primary);
+    padding: 15px 25px;
+    flex-shrink: 0;
+    /* Keep header size fixed */
+}
+
+/* 3. The Body Expands */
+.cyber-card.fullscreen .card-body {
+    flex-grow: 1;
+    height: calc(100vh - 70px) !important;
+    max-height: none !important;
+    padding: 20px;
+    overflow: hidden;
+    /* Prevent body scrollbar bleed */
+}
+
+/* 4. Specific Content Fixes */
+
+/* A. Charts */
+.cyber-card.fullscreen .chart-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* B. Tables (Leaderboard) */
+.cyber-card.fullscreen .table-wrapper {
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+/* C. Inspector Layout */
+.cyber-card.fullscreen .inspector-layout {
+    height: 100%;
+    justify-content: flex-start;
+    gap: 30px;
+}
+
+.cyber-card.fullscreen .inspector-layout .analysis-container {
+    flex-grow: 1;
+    /* Let radar chart grow huge */
+}
+
+/* --- MOBILE OPTIMIZATION --- */
+@media screen and (max-width: 768px) {
+    .cyber-card.fullscreen .card-body {
+        padding: 10px;
+        overflow-y: auto;
+        /* Allow scrolling content inside fullscreen on mobile */
+    }
+
+    .cyber-card.fullscreen .inspector-layout {
+        height: auto;
+    }
+}
+
+/* --- LEADERBOARD SCROLL FIX --- */
+
+/* Target the element that acts as BOTH the body and the wrapper */
+.cyber-card.fullscreen .card-body.table-wrapper {
+    /* 1. ENABLE SCROLLING */
+    overflow-y: auto !important;
+
+    /* 2. Fill the screen height (Screen - Header Size) */
+    height: calc(100vh - 70px) !important;
+
+    /* 3. Remove padding so the sticky header touches the top */
+    padding: 0 !important;
+
+    /* 4. Ensure it displays as a block to let the table render correctly */
+    display: block !important;
+}
+
+/* Optional: Ensure the table itself takes full width */
+.cyber-card.fullscreen .card-body.table-wrapper table {
+    width: 100% !important;
+}
