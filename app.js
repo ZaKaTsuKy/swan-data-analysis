@@ -227,9 +227,9 @@ function getTierColor(val, type) {
     const span = range.max - range.min;
     const lowThreshold = range.min + (span * 0.33);
     const highThreshold = range.min + (span * 0.66);
-    if (val >= highThreshold) return '#00ff9d'; // High (Green)
-    if (val >= lowThreshold) return '#e0e6ed'; // Mid (White)
-    return '#5a6572';                           // Low (Grey)
+    if (val >= highThreshold) return '#2ddd44ff'; // High (Green)
+    if (val >= lowThreshold) return '#3edcedff'; // Mid (White)
+    return '#bc1b2dff';                           // Low (Grey)
 }
 
 function getRoleColor(role) {
