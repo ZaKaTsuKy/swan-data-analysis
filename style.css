@@ -507,159 +507,7 @@ body {
     }
 }
 
-/* --- MOBILE DEVICES (Max Width: 768px) --- */
-@media screen and (max-width: 768px) {
 
-    body {
-        overflow-y: auto !important;
-        height: auto !important;
-        position: relative;
-        /* Essential for absolute positioning */
-    }
-
-    /* 2. Update the button styles */
-    #mobile-menu-btn {
-        display: block !important;
-
-        /* 'absolute' makes it scroll away with the page. 
-           'fixed' would make it stay on screen. */
-        position: absolute;
-
-        top: 15px;
-        right: 15px;
-        z-index: 1001;
-        /* High z-index to sit above other elements */
-        width: auto;
-        padding: 10px 15px;
-
-        /* Visual Styles */
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(5px);
-        box-shadow: 0 0 15px var(--primary);
-    }
-
-    /* 1. Layout: Remove Sidebar from Grid */
-    .app-container {
-        display: block;
-        /* Stack everything */
-        height: auto;
-        overflow-y: auto;
-        /* Main scroll moves to body */
-    }
-
-    /* 2. Sidebar: Transform into Slide-out Drawer */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        /* Hide off-screen */
-        width: 85%;
-        height: 100vh;
-        background: rgba(5, 8, 12, 0.98);
-        backdrop-filter: blur(10px);
-        transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        border-right: 1px solid var(--primary);
-        box-shadow: 10px 0 50px #000;
-        z-index: 999;
-        /* On top of everything */
-    }
-
-    .sidebar.active {
-        left: 0;
-        /* Slide in */
-    }
-
-    /* Show the Mobile Menu Button */
-    #mobile-menu-btn {
-        display: block !important;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(5px);
-        border: 1px solid var(--primary);
-        box-shadow: 0 0 15px var(--primary);
-    }
-
-    /* 3. Main Content: Full Width & Stacked */
-    .main-content {
-        padding: 60px 15px 15px 15px;
-        /* Top padding for the menu button */
-        height: auto;
-        overflow: visible;
-    }
-
-    /* 4. Grid Sections: Stack Vertically */
-    .grid-section {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        height: auto;
-        min-height: auto;
-    }
-
-    .top-row,
-    .middle-row,
-    .bottom-row {
-        height: auto;
-        min-height: auto;
-        grid-template-columns: 1fr;
-    }
-
-    /* 5. Cards & Charts: Define Mobile Heights */
-    .cyber-card {
-        min-height: 400px;
-        /* Ensure charts have space to render */
-        margin-bottom: 0;
-    }
-
-    #scatter-container {
-        height: 400px;
-    }
-
-    #inspector-panel {
-        height: auto;
-    }
-
-    /* Middle row charts need height */
-    .middle-row .cyber-card {
-        height: 350px;
-    }
-
-    /* 6. Entity Inspector Adjustments */
-    .portrait-container img {
-        width: 60px;
-        height: 60px;
-        /* Smaller portrait */
-    }
-
-    .entity-info h2 {
-        font-size: 1.2rem;
-    }
-
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
-        /* 2 Columns instead of 3 */
-    }
-
-    /* Spanning tiles (Potential/EHP) take full width on mobile */
-    .metric-tile[style*="span 1.5"] {
-        grid-column: span 2 !important;
-    }
-
-    /* 7. Table Adjustments */
-    .table-wrapper {
-        max-height: 500px;
-        /* Internal scroll for table only */
-    }
-
-    /* Allow horizontal scroll for table on mobile if needed */
-    .cyber-table {
-        min-width: 600px;
-        /* Force scroll if screen is too narrow */
-    }
-
-    .table-wrapper {
-        overflow-x: auto;
-    }
-}
 
 /* --- Analytics Section --- */
 .analytics-row {
@@ -789,25 +637,7 @@ body {
     opacity: 0.7;
 }
 
-/* Mobile Adjustment for Analytics */
-@media screen and (max-width: 768px) {
-    .analytics-split {
-        grid-template-columns: 1fr;
-        /* Stack vertically */
-        grid-template-rows: 1fr auto;
-    }
 
-    .chart-info-panel {
-        border-left: none;
-        border-top: 1px solid var(--border-color);
-        height: auto;
-    }
-
-    .analytics-row {
-        height: auto !important;
-        /* Allow growth */
-    }
-}
 
 #regression-panel {
     display: flex;
@@ -821,4 +651,192 @@ body {
 .formula-card:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     transform: translateX(5px);
+}
+
+/* =========================================
+   MOBILE DEVICES (Max Width: 768px) 
+   ========================================= */
+@media screen and (max-width: 768px) {
+
+    /* --- 1. CORE SCROLLING & POSITIONING --- */
+    body {
+        overflow-y: auto !important;
+        height: auto !important;
+        position: relative;
+    }
+
+    /* --- 2. MENU BUTTON (Floating Top Right) --- */
+    #mobile-menu-btn {
+        display: block !important;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1001;
+        width: auto;
+        padding: 10px 15px;
+        background: rgba(5, 8, 12, 0.95);
+        backdrop-filter: blur(5px);
+        border: 1px solid var(--primary);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        color: var(--primary);
+    }
+
+    /* --- 3. LAYOUT STACKING --- */
+    .app-container {
+        display: block;
+        height: auto;
+        overflow: visible;
+    }
+
+    .main-content {
+        padding: 80px 15px 20px 15px;
+        height: auto;
+        overflow: visible;
+    }
+
+    /* Grid Sections become Columns */
+    .grid-section,
+    .top-row,
+    .middle-row,
+    .bottom-row {
+        display: flex;
+        flex-direction: column;
+        height: auto !important;
+        min-height: auto !important;
+        gap: 20px;
+    }
+
+    /* --- 4. SIDEBAR DRAWER --- */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 85%;
+        height: 100vh;
+        background: rgba(5, 8, 12, 0.98);
+        border-right: 1px solid var(--primary);
+        z-index: 999;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* --- 5. GENERAL CARD ADJUSTMENTS --- */
+    .cyber-card {
+        height: auto;
+        min-height: 400px;
+        margin-bottom: 20px;
+    }
+
+    #scatter-container,
+    #inspector-panel {
+        height: 400px !important;
+        min-height: 400px;
+    }
+
+    /* --- 6. DEEP ANALYTICS FIX (The Critical Part) --- */
+
+    /* A. Break the Header Layout: Stack Title & Tabs */
+    .analytics-row .card-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+        padding-bottom: 0;
+    }
+
+    /* B. Make Tabs Swipeable/Scrollable */
+    .tab-controls {
+        display: flex;
+        width: 100%;
+        overflow-x: auto;
+        /* Enable Horizontal Scroll */
+        white-space: nowrap;
+        gap: 10px;
+        padding-bottom: 10px;
+        /* Space for scrollbar thumb */
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scroll on iOS */
+        scrollbar-width: none;
+        /* Hide scrollbar Firefox */
+    }
+
+    .tab-controls::-webkit-scrollbar {
+        display: none;
+        /* Hide scrollbar Chrome/Safari */
+    }
+
+    .cyber-tab {
+        flex: 0 0 auto;
+        /* Stop buttons from shrinking */
+        padding: 10px 20px;
+        background: rgba(0, 243, 255, 0.05);
+        border: 1px solid var(--text-dim);
+    }
+
+    .cyber-tab.active {
+        background: var(--primary);
+        color: #000;
+        text-shadow: none;
+    }
+
+    /* C. Analytics Split Layout (Chart vs Info) */
+    .analytics-row {
+        height: auto !important;
+    }
+
+    .analytics-split {
+        display: flex;
+        flex-direction: column;
+        /* Stack Chart Top, Info Bottom */
+        height: auto;
+    }
+
+    /* D. Force Chart Height */
+    .analytics-split>div:first-child {
+        height: 450px !important;
+        /* Give charts plenty of room */
+        min-height: 450px;
+        width: 100%;
+        position: relative;
+    }
+
+    /* E. Info Panel Styling */
+    .chart-info-panel {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        /* Limit height so page isn't infinite */
+        overflow-y: auto;
+        border-left: none;
+        border-top: 1px solid var(--primary);
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* --- 7. TABLE & OTHER FIXES --- */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .metric-tile[style*="span 1.5"] {
+        grid-column: span 2 !important;
+    }
+
+    /* Entity Portrait size */
+    .portrait-container img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .table-wrapper {
+        max-height: 500px;
+        overflow-x: auto;
+    }
+
+    .cyber-table {
+        min-width: 600px;
+    }
 }
