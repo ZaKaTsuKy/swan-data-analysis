@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.W.A.N. // Bio-Organic Data Analysis</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- External Libraries -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <!-- Local Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>S.W.A.N.</h1>
+                <p>Systems . Weapon . Analysis . Network</p>
+            </div>
+
+            <div class="control-panel">
+                <div class="panel-section">
+                    <label>DATA SOURCE</label>
+                    <div class="file-input-wrapper">
+                        <!-- Demo button removed -->
+                        <div class="upload-btn-wrapper">
+                            <button class="cyber-btn secondary">RE-UPLOAD CSV</button>
+                            <input type="file" id="csv-file" accept=".csv">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <label>FILTERS</label>
+                    <input type="text" id="search-input" class="cyber-input" placeholder="SEARCH IDENTIFIER...">
+
+                    <div class="filter-group">
+                        <label style="margin-top: 10px;">MIN GRADE</label>
+                        <input type="range" id="star-slider" min="1" max="5" value="1" step="1" style="width: 100%;">
+                        <span id="star-display"
+                            style="font-family: var(--font-mono); color: var(--primary); font-size: 0.8rem; float: right;">1★</span>
+                    </div>
+
+                    <div class="filter-group">
+                        <label style="margin-top: 15px;">ELEMENT</label>
+                        <select id="element-select" multiple class="cyber-select">
+                            <!-- JS Generated -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-section stats-summary">
+                    <label>SYSTEM STATUS</label>
+                    <div class="stat-row"
+                        style="display: flex; justify-content: space-between; color: #fff; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 5px;">
+                        <span>ENTITIES</span>
+                        <span id="kpi-count" style="color: var(--primary);">0</span>
+                    </div>
+                    <div class="stat-row"
+                        style="display: flex; justify-content: space-between; color: #fff; font-family: var(--font-mono); font-size: 0.8rem;">
+                        <span>AVG POTENTIAL</span>
+                        <span id="kpi-ehp">0%</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Grid -->
+        <main class="main-content">
+
+            <!-- Top Row: Overview & Inspector -->
+            <div class="grid-section top-row">
+
+                <!-- Scatter Plot -->
+                <div class="cyber-card" id="scatter-container">
+                    <div class="card-header">
+                        <h3><span class="icon">✣</span> CORRELATION MATRIX: ATK vs EHP</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="main-scatter" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <!-- Entity Inspector -->
+                <div class="cyber-card inspector" id="inspector-panel">
+                    <div class="card-header">
+                        <h3><span class="icon">◎</span> ENTITY INSPECTOR</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Content injected by JS -->
+                        <div
+                            style="display: flex; height: 100%; align-items: center; justify-content: center; color: var(--text-dim); font-family: var(--font-mono);">
+                            INITIALIZING SCANNER...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Row: Distributions -->
+            <div class="grid-section middle-row">
+                <div class="cyber-card">
+                    <div class="card-header">
+                        <h3>STAT DISTRIBUTION (Z-SCORE)</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="box-plot" class="chart-container"></div>
+                    </div>
+                </div>
+                <div class="cyber-card">
+                    <div class="card-header">
+                        <h3>POTENTIAL DENSITY</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="hist-plot" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Data Grid -->
+            <div class="grid-section bottom-row">
+                <div class="cyber-card">
+                    <div class="card-header">
+                        <h3>GLOBAL LEADERBOARD</h3>
+                    </div>
+                    <div class="card-body table-wrapper">
+                        <table id="data-table" class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; color: var(--text-dim);">#</th>
+                                    <th>NAME</th>
+                                    <th>ELM</th>
+                                    <th>HP</th>
+                                    <th>ATK</th>
+                                    <th>DEF</th>
+                                    <th>SPD</th>
+                                    <th>EHP</th>
+                                    <th>TBP</th>
+                                    <th>ARCH</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="loader" class="loader-overlay">
+        <div class="scanner-line"></div>
+        <div style="margin-top: 20px; color: var(--primary);">LOADING LOCAL DATASET...</div>
+    </div>
+
+    <script src="dataset.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
