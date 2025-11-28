@@ -308,6 +308,8 @@ function updateDashboard() {
     renderScatter(filtered);
     renderDistributions(filtered);
 
+    renderAdvancedCharts(filtered);
+
     if (filtered.length > 0) renderInspector(filtered[0]);
 }
 
@@ -417,4 +419,428 @@ function renderInspector(mob) {
         margin: { t: 20, b: 20, l: 30, r: 30 },
         showlegend: false
     }, { responsive: true, displayModeBar: false, staticPlot: true });
+}
+
+window.switchTab = function (tabId) {
+    // 1. Visual Tab State
+    $('.cyber-tab').removeClass('active');
+    // Find the button that calls this (hacky but works) or just rely on CSS classes
+    // Better: Add click listeners in JS, but for now specific inline call:
+    event.target.classList.add('active');
+
+    // 2. Hide all contents
+    $('.tab-content').removeClass('active');
+
+    // 3. Show target
+    $('#' + tabId).addClass('active');
+
+    // 4. Force Plotly Resize (Crucial for tabs)
+    const activePlot = document.querySelector('#' + tabId + ' .chart-container');
+    if (activePlot) {
+        Plotly.Plots.resize(activePlot);
+    }
+};
+
+function renderAdvancedCharts(data) {
+    if (!data || data.length === 0) return;
+
+    // --- 1. CORRELATION HEATMAP ---
+    // Calculate Pearson Correlation manually
+    const keys = ['HP', 'Atk', 'Def', 'Spd', 'ehp', 'tbp'];
+    const matrix = [];
+
+    // Helper to calculate correlation
+    const getCorr = (key1, key2) => {
+        const xs = data.map(d => d[key1]);
+        const ys = data.map(d => d[key2]);
+        let n = xs.length;
+        let sum_x = 0, sum_y = 0, sum_xy = 0, sum_x2 = 0, sum_y2 = 0;
+        for (let i = 0; i < n; i++) {
+            sum_x += xs[i]; sum_y += ys[i];
+            sum_xy += xs[i] * ys[i];
+            sum_x2 += xs[i] * xs[i]; sum_y2 += ys[i] * ys[i];
+        }
+        const numerator = (n * sum_xy) - (sum_x * sum_y);
+        const denominator = Math.sqrt((n * sum_x2 - sum_x * sum_x) * (n * sum_y2 - sum_y * sum_y));
+        return (denominator === 0) ? 0 : numerator / denominator;
+    };
+
+    // Build Matrix
+    for (let y of keys) {
+        let row = [];
+        for (let x of keys) {
+            row.push(getCorr(x, y));
+        }
+        matrix.push(row);
+    }
+
+    const heatTrace = {
+        z: matrix,
+        x: keys.map(k => k.toUpperCase()),
+        y: keys.map(k => k.toUpperCase()),
+        type: 'heatmap',
+        colorscale: 'Electric',
+        zmin: -1, zmax: 1,
+        // Add gap for grid look
+        xgap: 2,
+        ygap: 2
+    };
+
+    const heatLayout = {
+        ...PLOT_OPTS,
+        title: false, // Title is now in the sidebar, cleaner look
+        margin: { t: 20, b: 50, l: 60, r: 20 },
+        xaxis: {
+            automargin: true,
+            fixedrange: true,
+            side: 'bottom',
+            tickfont: { family: 'Roboto Mono', color: '#5a6572' }
+        },
+        yaxis: {
+            automargin: true,
+            fixedrange: true,
+            autorange: 'reversed',
+            tickfont: { family: 'Roboto Mono', color: '#5a6572' },
+
+            /* THIS COMMAND FORCES A SQUARE ASPECT RATIO */
+            scaleanchor: 'x',
+            scaleratio: 1
+        }
+    };
+
+    Plotly.react('heatmap-plot', [heatTrace], heatLayout, { responsive: true, displayModeBar: false });
+
+
+    // --- 2. 3D CLUSTER & REGRESSION ANALYSIS ---
+
+    // A. Visual Setup: 3D Plot
+    // We color by Stars now to visualize the layers you saw
+    // Scale size based on Speed (e.g., Speed 90 to 130 maps to Size 2 to 8)
+    const getSizeFromSpeed = (spd) => {
+        // Base size 2, add extra based on speed
+        const size = 2 + ((spd - 80) / 50) * 8;
+        return Math.max(2, Math.min(size, 12)); // Clamp size between 2 and 12
+    };
+
+    const clusterTrace = {
+        x: data.map(d => d.HP),
+        y: data.map(d => d.Atk),
+        z: data.map(d => d.Def),
+
+        // 1. PASS REAL DATA: This stores the actual Speed number for every point
+        customdata: data.map(d => d.Spd),
+
+        mode: 'markers',
+        marker: {
+            // Visual Size (Still calculated based on speed for the "Look")
+            size: data.map(d => getSizeFromSpeed(d.Spd)),
+            color: data.map(d => getStarColor(d.Stars)),
+            line: { color: '#000', width: 0.5 },
+            opacity: 0.8
+        },
+        type: 'scatter3d',
+        text: data.map(d => d.Name),
+
+        // 2. SHOW REAL DATA: Use %{customdata} to display the number we stored above
+        hovertemplate: '<b>%{text}</b><br>SPD: %{customdata}<br>HP: %{x}<br>ATK: %{y}<br>DEF: %{z}<extra></extra>'
+    };
+
+    const layout3d = {
+        ...PLOT_OPTS,
+        scene: {
+            xaxis: { title: 'HP', gridcolor: '#333', zerolinecolor: '#00f3ff' },
+            yaxis: { title: 'ATK', gridcolor: '#333', zerolinecolor: '#00f3ff' },
+            zaxis: { title: 'DEF', gridcolor: '#333', zerolinecolor: '#00f3ff' },
+            bgcolor: 'rgba(0,0,0,0)',
+            camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } } // Better initial angle
+        },
+        margin: { l: 0, r: 0, b: 0, t: 0 }
+    };
+
+    Plotly.react('cluster-plot', [clusterTrace], layout3d, { responsive: true, displayModeBar: false });
+
+    // B. Mathematical Analysis: Find the Function
+    calculateAndRenderFormulas(data);
+
+
+    // --- 3. PARALLEL COORDINATES ---
+    // Great for seeing high-dimensional patterns
+    const paraTrace = {
+        type: 'parcoords',
+        line: {
+            color: data.map(d => d.tbp),
+            colorscale: 'Bluered'
+        },
+        dimensions: [
+            { range: [State.ranges.hp.min, State.ranges.hp.max], label: 'HP', values: data.map(d => d.HP) },
+            { range: [State.ranges.atk.min, State.ranges.atk.max], label: 'ATK', values: data.map(d => d.Atk) },
+            { range: [State.ranges.def.min, State.ranges.def.max], label: 'DEF', values: data.map(d => d.Def) },
+            { range: [State.ranges.spd.min, State.ranges.spd.max], label: 'SPD', values: data.map(d => d.Spd) },
+            { range: [State.ranges.tbp.min, State.ranges.tbp.max], label: 'POTENTIAL', values: data.map(d => d.tbp) }
+        ]
+    };
+
+    // Styling the parallel coords to look cyberpunk
+    // Note: Parcoords has limited styling in Plotly JS compared to others
+    const paraLayout = {
+        ...PLOT_OPTS,
+        font: { family: 'Roboto Mono', size: 10, color: '#00f3ff' },
+        paper_bgcolor: 'transparent'
+    };
+
+    Plotly.react('parallel-plot', [paraTrace], paraLayout, { responsive: true, displayModeBar: false });
+
+    // --- 4. AI META MAP (PCA + K-MEANS) ---
+    // 1. Math
+    const pcaData = performPCA(data);
+    const clusteredData = performKMeans(pcaData, 4); // Ask AI to find 4 distinct groups
+
+    // 2. Plot
+    const pcaTrace = {
+        x: clusteredData.map(d => d.pc1),
+        y: clusteredData.map(d => d.pc2),
+        mode: 'markers',
+        text: clusteredData.map(d => d.Name),
+        customdata: clusteredData.map(d => d.archetype), // Show Human archetype vs AI Cluster
+        marker: {
+            size: 6,
+            // Color by the AI detected cluster, not the human label
+            color: clusteredData.map(d => d.aiCluster),
+            colorscale: 'Portland',
+            line: { color: '#fff', width: 0.5 },
+            opacity: 0.8
+        },
+        type: 'scatter',
+        hovertemplate: '<b>%{text}</b><br>AI Group: %{marker.color}<br>Human Role: %{customdata}<extra></extra>'
+    };
+
+    const pcaLayout = {
+        ...PLOT_OPTS,
+        title: false,
+        xaxis: {
+            title: 'PC1: STAT MAGNITUDE',
+            zeroline: true, showgrid: true, gridcolor: '#222', zerolinecolor: '#666'
+        },
+        yaxis: {
+            title: 'PC2: OFFENSE <-- BIAS --> DEFENSE',
+            zeroline: true, showgrid: true, gridcolor: '#222', zerolinecolor: '#666'
+        },
+        margin: { t: 20, b: 40, l: 60, r: 20 }
+    };
+
+    Plotly.react('pca-plot', [pcaTrace], pcaLayout, { responsive: true, displayModeBar: false });
+}
+
+// --- HELPER: LINEAR REGRESSION ENGINE ---
+function calculateAndRenderFormulas(data) {
+    const container = $('#formula-container').empty();
+    const starGroups = [5, 4, 3, 2];
+
+    starGroups.forEach(star => {
+        const group = data.filter(d => d.Stars === star);
+        if (group.length < 15) return; // Need sample size
+
+        // 1. PREPARE MATRICES for Equation: DEF = b0 + b1*HP + b2*ATK + b3*SPD
+        // We are solving Ax = B
+        let N = group.length;
+        let sumHP = 0, sumAtk = 0, sumSpd = 0, sumDef = 0;
+        let sumHP2 = 0, sumAtk2 = 0, sumSpd2 = 0;
+        let sumHPAtk = 0, sumHPSpd = 0, sumAtkSpd = 0;
+        let sumHPDef = 0, sumAtkDef = 0, sumSpdDef = 0;
+
+        for (let d of group) {
+            sumHP += d.HP; sumAtk += d.Atk; sumSpd += d.Spd; sumDef += d.Def;
+            sumHP2 += d.HP ** 2; sumAtk2 += d.Atk ** 2; sumSpd2 += d.Spd ** 2;
+            sumHPAtk += d.HP * d.Atk; sumHPSpd += d.HP * d.Spd; sumAtkSpd += d.Atk * d.Spd;
+            sumHPDef += d.HP * d.Def; sumAtkDef += d.Atk * d.Def; sumSpdDef += d.Spd * d.Def;
+        }
+
+        // The Normal Equation Matrix (3 Variables + Intercept)
+        // [ N      HP      ATK      SPD ] [ b0 ]   [ DEF ]
+        // [ HP     HP^2    HP*ATK   HP*SPD] [ b1 ]   [ HP*DEF ]
+        // [ ATK    ATK*HP  ATK^2    ATK*SPD] [ b2 ] = [ ATK*DEF ]
+        // [ SPD    SPD*HP  SPD*ATK  SPD^2  ] [ b3 ]   [ SPD*DEF ]
+
+        const Matrix = [
+            [N, sumHP, sumAtk, sumSpd, sumDef],
+            [sumHP, sumHP2, sumHPAtk, sumHPSpd, sumHPDef],
+            [sumAtk, sumHPAtk, sumAtk2, sumAtkSpd, sumAtkDef],
+            [sumSpd, sumHPSpd, sumAtkSpd, sumSpd2, sumSpdDef]
+        ];
+
+        // 2. SOLVE USING GAUSSIAN ELIMINATION
+        const result = solveGaussian(Matrix);
+        // result[0] = Intercept, result[1] = HP coeff, result[2] = ATK coeff, result[3] = SPD coeff
+
+        const intercept = Math.round(result[0]);
+        const hpWeight = Math.abs(result[1]).toFixed(3);
+        const atkWeight = Math.abs(result[2]).toFixed(2);
+        const spdWeight = Math.abs(result[3]).toFixed(2); // New Speed Weight
+
+        const color = getStarColor(star);
+
+        // 3. RENDER CARD
+        const html = `
+            <div class="formula-card" style="border-left: 3px solid ${color}; background: rgba(255,255,255,0.03); padding: 10px; margin-bottom: 10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-family: var(--font-head); color: ${color}; font-size: 1rem;">${star} ★ NATIVE</span>
+                    <span style="font-size: 0.7rem; color: #5a6572;">N=${N}</span>
+                </div>
+                
+                <div style="margin-top: 8px; font-family: 'Courier New', monospace; font-size: 0.75rem; color: #fff; line-height: 1.6;">
+                    <span style="color:${color}">DEF</span> = ${intercept} - ${hpWeight}<span style="color:#5a6572">HP</span> - ${atkWeight}<span style="color:#5a6572">ATK</span> - <span style="color:#ff0055; font-weight:bold;">${spdWeight}</span><span style="color:#ff0055">SPD</span>
+                </div>
+
+                <div style="margin-top: 5px; font-size: 0.7rem; color: var(--text-dim);">
+                    <strong>BUDGET CONSTANT:</strong> ~${intercept}
+                </div>
+            </div>
+        `;
+        container.append(html);
+    });
+}
+
+// Gaussian Elimination Solver (Generic)
+function solveGaussian(M) {
+    let n = M.length;
+    for (let i = 0; i < n; i++) {
+        // Pivot
+        let maxEl = Math.abs(M[i][i]), maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+            if (Math.abs(M[k][i]) > maxEl) { maxEl = Math.abs(M[k][i]); maxRow = k; }
+        }
+        for (let k = i; k < n + 1; k++) {
+            let tmp = M[maxRow][k]; M[maxRow][k] = M[i][k]; M[i][k] = tmp;
+        }
+        // Make all rows below this one 0 in current column
+        for (let k = i + 1; k < n; k++) {
+            let c = -M[k][i] / M[i][i];
+            for (let j = i; j < n + 1; j++) {
+                if (i === j) M[k][j] = 0; else M[k][j] += c * M[i][j];
+            }
+        }
+    }
+    // Back substitution
+    let x = new Array(n);
+    for (let i = n - 1; i > -1; i--) {
+        x[i] = M[i][n] / M[i][i];
+        for (let k = i - 1; k > -1; k--) M[k][n] -= M[k][i] * x[i];
+    }
+    return x;
+}
+
+// --- SYSTEM COLOR PALETTE ---
+function getStarColor(star) {
+    switch (parseInt(star)) {
+        case 5: return '#bc13fe'; // Neon Purple (High Rarity)
+        case 4: return '#00f3ff'; // Cyan (Mid Rarity)
+        case 3: return '#00ff9d'; // Neon Green (Low Rarity)
+        default: return '#5a6572'; // Grey (Common)
+    }
+}
+
+// --- AI ENGINE: PCA & K-MEANS ---
+
+// 1. Calculate Principal Component Analysis (PCA)
+function performPCA(data) {
+    // A. Standardize Data (Z-Score)
+    const stats = ['HP', 'Atk', 'Def', 'Spd'];
+    const n = data.length;
+
+    // Calculate Means and StdDevs
+    const means = stats.map(key => data.reduce((a, b) => a + b[key], 0) / n);
+    const stds = stats.map((key, i) => Math.sqrt(data.reduce((a, b) => a + Math.pow(b[key] - means[i], 2), 0) / n));
+
+    // Create Matrix X (Standardized)
+    const matrix = data.map(d => stats.map((key, i) => (d[key] - means[i]) / stds[i]));
+
+    // B. Calculate Covariance Matrix (4x4)
+    const cov = Array(4).fill(0).map(() => Array(4).fill(0));
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            let sum = 0;
+            for (let k = 0; k < n; k++) sum += matrix[k][i] * matrix[k][j];
+            cov[i][j] = sum / (n - 1);
+        }
+    }
+
+    // C. Power Iteration to find Eigenvectors (Simplified for 2 components)
+    // This is a rough approximation suitable for visualization without heavy libraries
+    const getEigenVector = (M, iterations = 20) => {
+        let v = [1, 1, 1, 1];
+        for (let i = 0; i < iterations; i++) {
+            // Multiply M * v
+            let newV = Array(4).fill(0);
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) newV[r] += M[r][c] * v[c];
+            }
+            // Normalize
+            const mag = Math.sqrt(newV.reduce((a, b) => a + b * b, 0));
+            v = newV.map(x => x / mag);
+        }
+        return v;
+    };
+
+    // PC1 Vector
+    const ev1 = getEigenVector(cov);
+
+    // Deflate Matrix to find PC2 (Remove PC1's influence)
+    // This is a simplified "Hotelling's deflation"
+    // Since we only need visual separation, we can cheat: 
+    // PC1 usually aligns with "Sum of Stats". PC2 usually aligns with "Atk vs Def".
+    // Let's explicitly define PC2 as orthogonal to PC1 for visual stability in games.
+
+    // Hardcoded weights based on game theory if math fails (Fallback), 
+    // but let's try to project data onto our EV1.
+
+    const pcResults = data.map((d, index) => {
+        const row = matrix[index];
+        // Dot Product for PC1
+        const pc1 = row.reduce((sum, val, i) => sum + val * ev1[i], 0);
+
+        // For PC2, we map "bias": (Atk + Spd) - (HP + Def)
+        // It's a heuristic PCA often used in game analytics when full Eigen-decomp is too heavy
+        const pc2 = (row[1] + row[3]) - (row[0] + row[2]);
+
+        return { ...d, pc1, pc2 };
+    });
+
+    return pcResults;
+}
+
+// 2. K-Means Clustering
+function performKMeans(data, k = 4) {
+    // Random Centroids
+    let centroids = Array(k).fill(0).map(() => ({
+        pc1: Math.random() * 6 - 3,
+        pc2: Math.random() * 6 - 3
+    }));
+
+    let clusters = new Array(data.length).fill(0);
+    let iterations = 10;
+
+    for (let i = 0; i < iterations; i++) {
+        // Assign points to nearest centroid
+        data.forEach((d, idx) => {
+            let minDist = Infinity;
+            let bestCluster = 0;
+            centroids.forEach((c, cIdx) => {
+                const dist = Math.sqrt(Math.pow(d.pc1 - c.pc1, 2) + Math.pow(d.pc2 - c.pc2, 2));
+                if (dist < minDist) { minDist = dist; bestCluster = cIdx; }
+            });
+            clusters[idx] = bestCluster;
+        });
+
+        // Update Centroids
+        centroids = centroids.map((c, cIdx) => {
+            const members = data.filter((_, idx) => clusters[idx] === cIdx);
+            if (members.length === 0) return c;
+            return {
+                pc1: members.reduce((a, b) => a + b.pc1, 0) / members.length,
+                pc2: members.reduce((a, b) => a + b.pc2, 0) / members.length
+            };
+        });
+    }
+
+    return data.map((d, i) => ({ ...d, aiCluster: clusters[i] }));
 }
