@@ -661,3 +661,164 @@ body {
     }
 }
 
+/* --- Analytics Section --- */
+.analytics-row {
+    /* 1. INCREASE HEIGHT */
+    min-height: 600px;
+    height: 65vh;
+}
+
+/* 2. SPLIT LAYOUT CONTAINER */
+.analytics-split {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    /* Chart takes space, Info panel is fixed width */
+    height: 100%;
+    gap: 20px;
+}
+
+/* 3. THE INFO PANEL STYLING */
+.chart-info-panel {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 1px solid var(--border-color);
+    padding: 20px;
+    font-family: var(--font-mono);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.chart-info-panel h4 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    border-bottom: 1px dashed var(--text-dim);
+    padding-bottom: 5px;
+}
+
+.info-item {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+.info-item strong {
+    color: #fff;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.legend-box {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    border: 1px solid #fff;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+    /* Spans full width */
+}
+
+/* Tab Controls */
+.tab-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.cyber-tab {
+    background: transparent;
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+    padding: 5px 15px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cyber-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+}
+
+.cyber-tab.active {
+    background: rgba(0, 243, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    text-shadow: 0 0 5px var(--primary);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    animation: fadeIn 0.5s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.overlay-instruction {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Mobile Adjustment for Analytics */
+@media screen and (max-width: 768px) {
+    .analytics-split {
+        grid-template-columns: 1fr;
+        /* Stack vertically */
+        grid-template-rows: 1fr auto;
+    }
+
+    .chart-info-panel {
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        height: auto;
+    }
+
+    .analytics-row {
+        height: auto !important;
+        /* Allow growth */
+    }
+}
+
+#regression-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.formula-card {
+    transition: 0.2s;
+}
+
+.formula-card:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: translateX(5px);
+}
