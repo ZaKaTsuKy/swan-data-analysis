@@ -512,10 +512,30 @@ body {
 
     body {
         overflow-y: auto !important;
-        /* Forces scrollbar to appear */
         height: auto !important;
-        /* Allows body to grow with content */
         position: relative;
+        /* Essential for absolute positioning */
+    }
+
+    /* 2. Update the button styles */
+    #mobile-menu-btn {
+        display: block !important;
+
+        /* 'absolute' makes it scroll away with the page. 
+           'fixed' would make it stay on screen. */
+        position: absolute;
+
+        top: 15px;
+        right: 15px;
+        z-index: 1001;
+        /* High z-index to sit above other elements */
+        width: auto;
+        padding: 10px 15px;
+
+        /* Visual Styles */
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        box-shadow: 0 0 15px var(--primary);
     }
 
     /* 1. Layout: Remove Sidebar from Grid */
