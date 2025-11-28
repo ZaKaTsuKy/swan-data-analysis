@@ -21,9 +21,14 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: var(--font-body);
-    height: 100vh;
-    overflow: hidden;
-    /* Only the container inside scrolls */
+
+    /* CHANGED: Allow the page itself to scroll */
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+
     background-image:
         linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
@@ -34,7 +39,9 @@ body {
 .app-container {
     display: grid;
     grid-template-columns: 320px 1fr;
-    height: 100%;
+    /* CHANGED: Remove fixed height */
+    height: auto;
+    min-height: 100vh;
 }
 
 /* --- Sidebar (Fixed) --- */
@@ -46,8 +53,16 @@ body {
     flex-direction: column;
     gap: 20px;
     z-index: 20;
-    overflow-y: auto;
     box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
+
+    /* CHANGED: Sticky Position */
+    position: sticky;
+    top: 0;
+    /* Stays at the top of the screen */
+    height: 100vh;
+    /* Takes full viewport height */
+    overflow-y: auto;
+    /* Only shows scrollbar if menu content is too tall */
 }
 
 .brand h1 {
@@ -118,12 +133,15 @@ body {
 /* --- Main Content (Scrollable) --- */
 .main-content {
     padding: 25px;
-    height: 100vh;
-    overflow-y: auto;
+
+    /* CHANGED: Remove fixed height and overflow */
+    height: auto;
+    overflow: visible;
+
     display: flex;
     flex-direction: column;
     gap: 25px;
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth; -> Removed (Body handles this now) */
 }
 
 /* Sections */
@@ -310,14 +328,15 @@ body {
 
 /* --- Table --- */
 .table-wrapper {
-    flex-grow: 1;
+    /* FIXED HEIGHT to force scrollbar to appear */
+    height: 500px;
+
     overflow-y: auto;
-    /* Allow Vertical Scrolling */
     overflow-x: hidden;
-    /* Disable Horizontal Scrolling */
     padding: 0;
     background: rgba(0, 0, 0, 0.3);
     width: 100%;
+    display: block;
 }
 
 .cyber-table {
