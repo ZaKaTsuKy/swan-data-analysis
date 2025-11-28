@@ -25,6 +25,7 @@
 </head>
 
 <body>
+    <!-- Mobile Menu Button -->
     <button id="mobile-menu-btn" class="cyber-btn">
         ☰ SYS.MENU
     </button>
@@ -41,7 +42,6 @@
                 <div class="panel-section">
                     <label>DATA SOURCE</label>
                     <div class="file-input-wrapper">
-                        <!-- Demo button removed -->
                         <div class="upload-btn-wrapper">
                             <button class="cyber-btn secondary">RE-UPLOAD CSV</button>
                             <input type="file" id="csv-file" accept=".csv">
@@ -90,20 +90,27 @@
             <!-- Top Row: Overview & Inspector -->
             <div class="grid-section top-row">
 
-                <!-- Scatter Plot -->
+                <!-- Scatter Plot Card -->
                 <div class="cyber-card" id="scatter-container">
-                    <div class="card-header">
-                        <h3><span class="icon">✣</span> CORRELATION MATRIX: ATK vs EHP</h3>
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><span class="icon">✣</span> CORRELATION MATRIX</h3>
+                        <!-- Universal Fullscreen Button -->
+                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
                     </div>
                     <div class="card-body">
                         <div id="main-scatter" class="chart-container"></div>
                     </div>
                 </div>
 
-                <!-- Entity Inspector -->
+                <!-- Entity Inspector Card -->
                 <div class="cyber-card inspector" id="inspector-panel">
-                    <div class="card-header">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h3><span class="icon">◎</span> ENTITY INSPECTOR</h3>
+                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
                     </div>
                     <div class="card-body">
                         <!-- Content injected by JS -->
@@ -117,17 +124,26 @@
 
             <!-- Middle Row: Distributions -->
             <div class="grid-section middle-row">
+                <!-- Stat Distribution Card -->
                 <div class="cyber-card">
-                    <div class="card-header">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>STAT DISTRIBUTION (Z-SCORE)</h3>
+                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
                     </div>
                     <div class="card-body">
                         <div id="box-plot" class="chart-container"></div>
                     </div>
                 </div>
+
+                <!-- Potential Density Card -->
                 <div class="cyber-card">
-                    <div class="card-header">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>POTENTIAL DENSITY</h3>
+                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
                     </div>
                     <div class="card-body">
                         <div id="hist-plot" class="chart-container"></div>
@@ -140,14 +156,23 @@
                 <div class="cyber-card full-width">
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3><span class="icon">∯</span> DEEP DATA ANALYTICS</h3>
+                        <div style="display:flex; align-items:center;">
+                            <h3><span class="icon">∯</span> DEEP DATA ANALYTICS</h3>
+                        </div>
 
-                        <!-- Tab Controls -->
-                        <div class="tab-controls">
-                            <button class="cyber-tab active" onclick="switchTab('tab-corr')">CORRELATION</button>
-                            <button class="cyber-tab" onclick="switchTab('tab-3d')">3D CLUSTER</button>
-                            <button class="cyber-tab" onclick="switchTab('tab-multi')">MULTIVARIATE</button>
-                            <button class="cyber-tab" onclick="switchTab('tab-pca')">AI META MAP</button>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <!-- Tab Controls -->
+                            <div class="tab-controls">
+                                <button class="cyber-tab active" onclick="switchTab('tab-corr')">CORRELATION</button>
+                                <button class="cyber-tab" onclick="switchTab('tab-3d')">3D CLUSTER</button>
+                                <button class="cyber-tab" onclick="switchTab('tab-multi')">MULTIVARIATE</button>
+                                <button class="cyber-tab" onclick="switchTab('tab-pca')">AI META MAP</button>
+                                <button class="cyber-tab" onclick="switchTab('tab-sun')">TAXONOMY</button>
+                            </div>
+
+                            <!-- Fullscreen Toggle Button -->
+                            <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                                style="width:auto; padding:5px 10px; margin:0; font-size:1.2rem; line-height:1;">⛶</button>
                         </div>
                     </div>
 
@@ -164,21 +189,16 @@
                                 <!-- RIGHT: The Explainer -->
                                 <div class="chart-info-panel">
                                     <h4>ANALYSIS MATRIX</h4>
-
                                     <div class="info-item">
                                         <div class="legend-box" style="background: #ffec00;"></div>
                                         <strong>POSITIVE CORRELATION (Yellow)</strong>
-                                        When one stat goes UP, the other also goes UP. (e.g., EHP naturally increases
-                                        with HP).
+                                        When one stat goes UP, the other also goes UP.
                                     </div>
-
                                     <div class="info-item">
                                         <div class="legend-box" style="background: #001f3f;"></div>
                                         <strong>NEGATIVE CORRELATION (Dark Blue)</strong>
-                                        When one stat goes UP, the other goes DOWN. This reveals "Trade-offs" (e.g.,
-                                        High HP units might have Low Speed).
+                                        When one stat goes UP, the other goes DOWN (Trade-offs).
                                     </div>
-
                                     <div class="info-item">
                                         <strong>COEFFICIENT (r)</strong>
                                         <ul style="padding-left: 20px; margin: 5px 0;">
@@ -187,18 +207,11 @@
                                             <li><span style="color:#001f3f">-1.0</span> : Total Opposite</li>
                                         </ul>
                                     </div>
-
-                                    <div class="info-item"
-                                        style="margin-top: auto; border-top: 1px solid #333; padding-top: 10px;">
-                                        <span style="color: var(--primary);">>> SYSTEM TIP:</span><br>
-                                        Look for bright yellow squares to find stats that synergize, or dark spots to
-                                        find stats that the developers balanced against each other.
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Tab 2: 3D Cluster & Regression Analysis -->
+                        <!-- Tab 2: 3D Cluster & Regression -->
                         <div id="tab-3d" class="tab-content">
                             <div class="analytics-split">
                                 <!-- LEFT: 3D Chart -->
@@ -207,7 +220,7 @@
                                     <div class="overlay-instruction">DRAG TO ROTATE // SCROLL TO ZOOM</div>
                                 </div>
 
-                                <!-- RIGHT: Mathematical Regression Panel -->
+                                <!-- RIGHT: Math Panel -->
                                 <div class="chart-info-panel" id="regression-panel">
                                     <h4>RARITY STAT FUNCTIONS</h4>
                                     <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 15px;">
@@ -215,10 +228,7 @@
                                         <span style="color: #fff; font-size: 0.7rem;">● DOT SIZE = SPEED (Larger is
                                             Faster)</span>
                                     </div>
-
-                                    <!-- JS will inject formulas here -->
                                     <div id="formula-container"></div>
-
                                     <div class="info-item"
                                         style="margin-top: auto; border-top: 1px solid #333; padding-top: 10px;">
                                         <span style="color: var(--primary);">>> DATA INSIGHT:</span><br>
@@ -233,41 +243,51 @@
                             <div id="parallel-plot" class="chart-container"></div>
                         </div>
 
-                        <!-- Tab 4: PCA & AI Clustering -->
+                        <!-- Tab 4: AI Meta Map -->
                         <div id="tab-pca" class="tab-content">
                             <div class="analytics-split">
-                                <!-- LEFT: The AI Map -->
+                                <!-- LEFT: AI Map -->
                                 <div style="position: relative; width: 100%; height: 100%;">
                                     <div id="pca-plot" class="chart-container"></div>
                                 </div>
-
-                                <!-- RIGHT: The Explainer -->
+                                <!-- RIGHT: Explainer -->
                                 <div class="chart-info-panel">
                                     <h4>UNSUPERVISED AI LEARNING</h4>
-
                                     <div class="info-item">
                                         <strong>ALGORITHM: PCA + K-MEANS</strong>
-                                        The system has mathematically compressed 4 dimensions (HP, ATK, DEF, SPD) into a
-                                        2D map and auto-detected groups.
+                                        Mathematical compression of 4 dimensions into a 2D map with auto-detected
+                                        groups.
                                     </div>
-
                                     <div class="info-item" style="margin-top: 15px;">
-                                        <strong>X-AXIS (PC1):</strong> Represents <span style="color:#00f3ff">TOTAL STAT
-                                            MAGNITUDE</span>. Units on the right are generally stronger overall.
+                                        <strong>X-AXIS (PC1):</strong> <span style="color:#00f3ff">TOTAL STAT
+                                            MAGNITUDE</span>.
                                     </div>
-
                                     <div class="info-item">
-                                        <strong>Y-AXIS (PC2):</strong> Represents <span style="color:#bc13fe">OFFENSE vs
+                                        <strong>Y-AXIS (PC2):</strong> <span style="color:#bc13fe">OFFENSE vs
                                             DEFENSE</span>.
-                                        <br>Top = Glass Cannons
-                                        <br>Bottom = Meat Shields
                                     </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div class="info-item"
-                                        style="margin-top: auto; border-top: 1px solid #333; padding-top: 10px;">
-                                        <span style="color: var(--primary);">>> TACTICAL INSIGHT:</span><br>
-                                        Units that are isolated far from their cluster are statistically unique
-                                        anomalies (Outliers).
+                        <!-- Tab 5: Taxonomy Sunburst -->
+                        <div id="tab-sun" class="tab-content">
+                            <div class="analytics-split">
+                                <!-- LEFT: Sunburst -->
+                                <div style="position: relative; width: 100%; height: 100%;">
+                                    <div id="sunburst-plot" class="chart-container"></div>
+                                </div>
+                                <!-- RIGHT: Info -->
+                                <div class="chart-info-panel">
+                                    <h4>DATA TAXONOMY</h4>
+                                    <div class="info-item">
+                                        <strong>HIERARCHICAL BREAKDOWN</strong>
+                                        Visualizing dataset composition.
+                                    </div>
+                                    <div class="info-item" style="margin-top: 10px;">
+                                        <span style="color:var(--primary)">INNER:</span> ELEMENT<br>
+                                        <span style="color:var(--secondary)">MIDDLE:</span> ARCHETYPE<br>
+                                        <span style="color:#fff">OUTER:</span> COUNT
                                     </div>
                                 </div>
                             </div>
@@ -275,11 +295,15 @@
                     </div>
                 </div>
             </div>
+
             <!-- Bottom Row: Data Grid -->
             <div class="grid-section bottom-row">
                 <div class="cyber-card">
-                    <div class="card-header">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>GLOBAL LEADERBOARD</h3>
+                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
                     </div>
                     <div class="card-body table-wrapper">
                         <table id="data-table" class="cyber-table">
@@ -311,6 +335,7 @@
         <div style="margin-top: 20px; color: var(--primary);">LOADING LOCAL DATASET...</div>
     </div>
 
+    <!-- Scripts -->
     <script src="dataset.js"></script>
     <script src="app.js"></script>
 </body>
