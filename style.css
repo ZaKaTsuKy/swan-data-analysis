@@ -510,6 +510,14 @@ body {
 /* --- MOBILE DEVICES (Max Width: 768px) --- */
 @media screen and (max-width: 768px) {
 
+    body {
+        overflow-y: auto !important;
+        /* Forces scrollbar to appear */
+        height: auto !important;
+        /* Allows body to grow with content */
+        position: relative;
+    }
+
     /* 1. Layout: Remove Sidebar from Grid */
     .app-container {
         display: block;
