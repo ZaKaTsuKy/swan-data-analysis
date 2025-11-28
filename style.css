@@ -473,3 +473,162 @@ body {
     cursor: pointer;
     z-index: 2;
 }
+
+/* =========================================
+   RESPONSIVE DESIGN ADAPTATION
+   ========================================= */
+
+/* --- TABLET & SMALL LAPTOPS (Max Width: 1024px) --- */
+@media screen and (max-width: 1024px) {
+
+    /* Adjust main layout to be more flexible */
+    .app-container {
+        grid-template-columns: 260px 1fr;
+        /* Narrower sidebar */
+    }
+
+    /* Stack the Top Row (Scatter + Inspector) */
+    .top-row {
+        grid-template-columns: 1fr;
+        /* Single column */
+        height: auto;
+        /* Allow growth */
+        min-height: auto;
+    }
+
+    /* Force height for charts since we removed fixed row height */
+    #scatter-container {
+        height: 450px;
+    }
+
+    #inspector-panel {
+        height: auto;
+        min-height: 500px;
+    }
+}
+
+/* --- MOBILE DEVICES (Max Width: 768px) --- */
+@media screen and (max-width: 768px) {
+
+    /* 1. Layout: Remove Sidebar from Grid */
+    .app-container {
+        display: block;
+        /* Stack everything */
+        height: auto;
+        overflow-y: auto;
+        /* Main scroll moves to body */
+    }
+
+    /* 2. Sidebar: Transform into Slide-out Drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        /* Hide off-screen */
+        width: 85%;
+        height: 100vh;
+        background: rgba(5, 8, 12, 0.98);
+        backdrop-filter: blur(10px);
+        transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        border-right: 1px solid var(--primary);
+        box-shadow: 10px 0 50px #000;
+        z-index: 999;
+        /* On top of everything */
+    }
+
+    .sidebar.active {
+        left: 0;
+        /* Slide in */
+    }
+
+    /* Show the Mobile Menu Button */
+    #mobile-menu-btn {
+        display: block !important;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        border: 1px solid var(--primary);
+        box-shadow: 0 0 15px var(--primary);
+    }
+
+    /* 3. Main Content: Full Width & Stacked */
+    .main-content {
+        padding: 60px 15px 15px 15px;
+        /* Top padding for the menu button */
+        height: auto;
+        overflow: visible;
+    }
+
+    /* 4. Grid Sections: Stack Vertically */
+    .grid-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        height: auto;
+        min-height: auto;
+    }
+
+    .top-row,
+    .middle-row,
+    .bottom-row {
+        height: auto;
+        min-height: auto;
+        grid-template-columns: 1fr;
+    }
+
+    /* 5. Cards & Charts: Define Mobile Heights */
+    .cyber-card {
+        min-height: 400px;
+        /* Ensure charts have space to render */
+        margin-bottom: 0;
+    }
+
+    #scatter-container {
+        height: 400px;
+    }
+
+    #inspector-panel {
+        height: auto;
+    }
+
+    /* Middle row charts need height */
+    .middle-row .cyber-card {
+        height: 350px;
+    }
+
+    /* 6. Entity Inspector Adjustments */
+    .portrait-container img {
+        width: 60px;
+        height: 60px;
+        /* Smaller portrait */
+    }
+
+    .entity-info h2 {
+        font-size: 1.2rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* 2 Columns instead of 3 */
+    }
+
+    /* Spanning tiles (Potential/EHP) take full width on mobile */
+    .metric-tile[style*="span 1.5"] {
+        grid-column: span 2 !important;
+    }
+
+    /* 7. Table Adjustments */
+    .table-wrapper {
+        max-height: 500px;
+        /* Internal scroll for table only */
+    }
+
+    /* Allow horizontal scroll for table on mobile if needed */
+    .cyber-table {
+        min-width: 600px;
+        /* Force scroll if screen is too narrow */
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+}
