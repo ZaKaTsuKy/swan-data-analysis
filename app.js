@@ -347,14 +347,64 @@ function renderScatter(data) {
 }
 
 function renderDistributions(data) {
+    // 1. Box Plot (Speed Z-Score)
     const boxTrace = {
-        y: data.map(d => d.z_spd), type: 'box', name: 'Speed Z',
-        marker: { color: '#bc13fe' }, boxpoints: 'all', jitter: 0.5, pointpos: -1.8
+        y: data.map(d => d.z_spd),
+        type: 'box',
+        name: 'Speed Z',
+        // Pass Name in customdata for lookup
+        customdata: data.map(d => d.Name),
+        marker: { color: '#bc13fe' },
+        boxpoints: 'all',
+        jitter: 0.5,
+        pointpos: -1.8,
+        hoverinfo: 'none' // Disable default plotly tooltip
     };
+
     Plotly.react('box-plot', [boxTrace], PLOT_OPTS, { responsive: true, displayModeBar: false });
 
+    // 2. Attach Interactive Listener to Box Plot
+    const boxPlot = document.getElementById('box-plot');
+
+    // Clean old listeners
+    boxPlot.removeAllListeners('plotly_hover');
+    boxPlot.removeAllListeners('plotly_unhover');
+    boxPlot.removeAllListeners('plotly_click');
+
+    boxPlot.on('plotly_hover', d => {
+        const pt = d.points[0];
+        // In box plots, 'customdata' matches the point index
+        const mobName = pt.customdata;
+        const zVal = pt.y; // The Z-Score value
+
+        const mob = State.rawData.find(m => m.Name === mobName);
+
+        if (mob) {
+            // Show Tooltip with Custom Footer
+            Tooltip.show(mob, d.event.clientX, d.event.clientY, {
+                label: "Z-SCORE",
+                value: (zVal > 0 ? "+" : "") + zVal.toFixed(2) + " σ"
+            });
+
+            // Also link to Inspector
+            renderInspector(mob);
+        }
+    });
+
+    boxPlot.on('plotly_unhover', () => Tooltip.hide());
+
+    boxPlot.on('plotly_click', d => {
+        const mobName = d.points[0].customdata;
+        const mob = State.rawData.find(m => m.Name === mobName);
+        if (mob) renderInspector(mob);
+    });
+
+
+    // 3. Histogram (Potential Density) - Keep as is
     const histTrace = {
-        x: data.map(d => d.tbp), type: 'histogram', marker: { color: '#00f3ff', opacity: 0.6 },
+        x: data.map(d => d.tbp),
+        type: 'histogram',
+        marker: { color: '#00f3ff', opacity: 0.6 },
         xbins: { size: 5 }
     };
     Plotly.react('hist-plot', [histTrace], PLOT_OPTS, { responsive: true, displayModeBar: false });
@@ -649,6 +699,8 @@ function renderAdvancedCharts(data) {
     };
 
     Plotly.react('parallel-plot', [paraTrace], paraLayout, { responsive: true, displayModeBar: false });
+
+    enableParCoordsHover(data);
 
     // --- 4. AI META MAP (PCA + K-MEANS) ---
     // 1. Math
@@ -1009,3 +1061,165 @@ $(document).keydown(function (e) {
         }
     }
 });
+
+// --- SYSTEM: LINKED INTELLIGENCE & TOOLTIPS ---
+const Tooltip = {
+    el: $('#cyber-tooltip'),
+    img: $('#tt-img'),
+    name: $('#tt-name'),
+    role: $('#tt-role'),
+    star: $('#tt-star'),
+    // New: access the footer label/value directly
+    footerLbl: $('.tooltip-footer label'),
+    footerVal: $('#tt-tbp'),
+
+    vals: { hp: $('#tt-hp'), atk: $('#tt-atk'), def: $('#tt-def'), spd: $('#tt-spd') },
+    bars: { hp: $('#bar-hp'), atk: $('#bar-atk'), def: $('#bar-def'), spd: $('#bar-spd') },
+
+    // Added 'customFooter' argument
+    show: function (mob, x, y, customFooter = null) {
+        if (!mob) return;
+
+        // 1. Basic Info
+        this.name.text(mob.Name);
+        this.role.text(mob.archetype.toUpperCase());
+        this.role.css('color', getRoleColor(mob.archetype));
+        this.star.text(mob.Stars + "★");
+        this.img.attr('src', mob.ImageURL || 'placeholder.png');
+
+        // 2. Footer Logic (Dynamic Switch)
+        if (customFooter) {
+            // Show Custom Metric (e.g. Z-Score)
+            this.footerLbl.text(customFooter.label);
+            this.footerVal.text(customFooter.value);
+            this.footerVal.css('color', '#bc13fe'); // Purple for Z-Score
+        } else {
+            // Default to Potential
+            this.footerLbl.text("POTENTIAL");
+            this.footerVal.text(mob.tbp.toFixed(1) + "%");
+            this.footerVal.css('color', 'var(--primary)');
+        }
+
+        // 3. Stats
+        this.vals.hp.text(mob.HP);
+        this.vals.atk.text(mob.Atk);
+        this.vals.def.text(mob.Def);
+        this.vals.spd.text(mob.Spd);
+
+        // 4. Bar Animation
+        const hpP = Math.min((mob.HP / 15000) * 100, 100);
+        const atkP = Math.min((mob.Atk / 1100) * 100, 100);
+        const defP = Math.min((mob.Def / 900) * 100, 100);
+        const spdP = Math.min((mob.Spd / 130) * 100, 100);
+
+        this.bars.hp.css('width', hpP + '%');
+        this.bars.atk.css('width', atkP + '%');
+        this.bars.def.css('width', defP + '%');
+        this.bars.spd.css('width', spdP + '%');
+
+        // 5. Positioning
+        const winW = $(window).width();
+        const winH = $(window).height();
+        let posX = x + 20;
+        let posY = y + 20;
+
+        if (posX + 300 > winW) posX = x - 310;
+        if (posY + 250 > winH) posY = y - 210;
+
+        this.el.hide().show(0);
+        this.el.css({ top: posY, left: posX, display: 'block' });
+    },
+
+    hide: function () {
+        this.el.hide();
+        // Reset
+        this.bars.hp.css('width', '0%');
+        this.bars.atk.css('width', '0%');
+        this.bars.def.css('width', '0%');
+        this.bars.spd.css('width', '0%');
+    }
+};
+
+// --- PARALLEL COORDINATES INTELLIGENCE ENGINE ---
+function enableParCoordsHover(data) {
+    const container = document.getElementById('parallel-plot');
+    if (!container) return;
+
+    // 1. Define Axis Structure (Must match the chart order)
+    const axes = [
+        { key: 'HP', range: State.ranges.hp },
+        { key: 'Atk', range: State.ranges.atk },
+        { key: 'Def', range: State.ranges.def },
+        { key: 'Spd', range: State.ranges.spd },
+        { key: 'tbp', range: State.ranges.tbp }
+    ];
+
+    // Throttle for performance
+    let lastFrame = 0;
+
+    container.onmousemove = (e) => {
+        const now = Date.now();
+        if (now - lastFrame < 20) return; // 20ms Limit (50fps)
+        lastFrame = now;
+
+        // 2. Get Mouse Position relative to Chart
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // 3. Define Chart Geometry (Estimated margins based on CSS/Plotly defaults)
+        const margins = { l: 50, r: 20, t: 30, b: 30 };
+        const drawW = rect.width - margins.l - margins.r;
+        const drawH = rect.height - margins.t - margins.b;
+
+        // 4. Determine Active Axis (0 to 4)
+        // We divide the width into 5 columns. 
+        // If mouse is at 10% width -> Index 0 (HP). 30% width -> Index 1 (ATK).
+        const pctX = (x - margins.l) / drawW;
+        const axisIdx = Math.round(pctX * (axes.length - 1));
+
+        // Safety Check: Is mouse inside the chart area?
+        if (axisIdx < 0 || axisIdx >= axes.length || pctX < -0.05 || pctX > 1.05) {
+            Tooltip.hide();
+            return;
+        }
+
+        // 5. Determine Target Value based on Height
+        // In ParCoords, Top (Y=0) is Max Value, Bottom (Y=Height) is Min Value
+        const pctY = 1 - ((y - margins.t) / drawH); // Invert Y
+        const targetAxis = axes[axisIdx];
+
+        // Calculate the value hovering under the mouse (e.g., 1200 ATK)
+        const mouseValue = targetAxis.range.min + (targetAxis.range.max - targetAxis.range.min) * pctY;
+
+        // 6. Find Nearest Monster
+        // We look for the mob whose stat on THIS axis is closest to the mouse value
+        let bestMob = null;
+        let minDiff = Infinity;
+
+        // Optimization: Only search if mouse is vertically valid
+        if (pctY >= 0 && pctY <= 1) {
+            for (let mob of data) {
+                const diff = Math.abs(mob[targetAxis.key] - mouseValue);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    bestMob = mob;
+                }
+            }
+        }
+
+        // 7. Trigger Tooltip if close enough
+        // Tolerance: The mob must be within 5% of the range to trigger
+        const tolerance = (targetAxis.range.max - targetAxis.range.min) * 0.05;
+
+        if (bestMob && minDiff < tolerance) {
+            Tooltip.show(bestMob, e.clientX, e.clientY);
+            // Optional: Also update the Left Inspector Panel for better visibility
+            // renderInspector(bestMob); 
+        } else {
+            Tooltip.hide();
+        }
+    };
+
+    container.onmouseleave = () => Tooltip.hide();
+}
