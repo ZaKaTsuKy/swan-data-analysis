@@ -167,7 +167,7 @@ function processRawData(data) {
         const z_spd = (d.Spd - State.stats.spd.mean) / State.stats.spd.std;
 
         // EHP & TBP
-        const ehp = d.HP * ((1000 + (3.5 * d.Def)) / 1000);
+        const ehp = d.HP * ((1140 + (3.5 * d.Def)) / 1000);
 
         const norm_hp = (d.HP - baseRanges.hp.min) / (baseRanges.hp.max - baseRanges.hp.min);
         const norm_atk = (d.Atk - baseRanges.atk.min) / (baseRanges.atk.max - baseRanges.atk.min);
@@ -1238,7 +1238,7 @@ const HELP_CONTENT = {
                     <span class="var" style="margin-left:5px;">HP</span>
                     <span class="op">×</span>
                     <span class="fraction">
-                        <span class="top"><span class="num">1000</span> <span class="op">+</span> (<span class="num">3.5</span> <span class="op">×</span> <span class="var">DEF</span>)</span>
+                        <span class="top"><span class="num">1140</span> <span class="op">+</span> (<span class="num">3.5</span> <span class="op">×</span> <span class="var">DEF</span>)</span>
                         <span class="bottom"><span class="num">1000</span></span>
                     </span>
                 </div>
@@ -1258,13 +1258,13 @@ const HELP_CONTENT = {
             <div style="margin-bottom: 25px;">
                 <strong style="color:var(--primary); display:block; margin-bottom:5px; font-family:var(--font-head); letter-spacing:1px; border-bottom:1px solid rgba(0,243,255,0.2); padding-bottom:2px;">/// Y-AXIS: EFFECTIVE HP</strong>
                 <div style="margin-bottom:10px; color:#ddd; font-size:0.85rem; line-height:1.5;">
-                    Measures raw survival capability by normalizing HP against Defense. It answers: <em>"How much HP would this unit need if it had 0 DEF?"</em>
+                    Measures raw survival capability by normalizing HP against Defense using the game's damage reduction constant (1140).
                 </div>
                 <div style="background:rgba(255,255,255,0.03); padding:10px; border-left:2px solid var(--secondary); font-size:0.8rem; font-family:var(--font-mono);">
                     <div style="color:var(--secondary); margin-bottom:3px; letter-spacing:1px;">>> SIMULATION: ZERATH</div>
                     <div style="display:grid; grid-template-columns: auto 1fr; gap: 5px 15px;">
                         <span style="color:var(--text-dim);">INPUT:</span> <span style="color:#fff;">15,315 HP & 560 DEF</span>
-                        <span style="color:var(--text-dim);">RESULT:</span> <span style="color:var(--primary); font-weight:bold;">45.3k Effective HP</span>
+                        <span style="color:var(--text-dim);">RESULT:</span> <span style="color:var(--primary); font-weight:bold;">47.4k Effective HP</span>
                     </div>
                 </div>
             </div>
