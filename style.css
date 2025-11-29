@@ -961,3 +961,189 @@ body {
 .cyber-card.fullscreen .card-body.table-wrapper table {
     width: 100% !important;
 }
+
+/* --- ADVANCED HOLOGRAPHIC TOOLTIP --- */
+.cyber-tooltip {
+    position: fixed;
+    display: none;
+    z-index: 10000;
+    background: rgba(5, 8, 12, 0.95);
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
+    backdrop-filter: blur(10px);
+    width: 280px;
+    pointer-events: none;
+    border-radius: 2px;
+    overflow: hidden;
+    /* Animation Origin */
+    transform-origin: top left;
+    animation: holoPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Entry Animation */
+@keyframes holoPop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* The moving scanline */
+.tooltip-scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 243, 255, 0.5);
+    box-shadow: 0 0 10px var(--primary);
+    opacity: 0.5;
+    animation: scanDown 2s linear infinite;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes scanDown {
+    0% {
+        top: -10%;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 110%;
+        opacity: 0;
+    }
+}
+
+/* Header */
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+    background: rgba(0, 243, 255, 0.05);
+    border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.tt-title {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    color: #fff;
+    text-shadow: 0 0 5px var(--primary);
+}
+
+.tt-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--secondary);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.tt-star {
+    font-family: var(--font-mono);
+    color: #ffd700;
+    font-weight: bold;
+}
+
+/* Body Layout */
+.tooltip-body {
+    display: flex;
+    padding: 10px;
+    gap: 12px;
+}
+
+/* Portrait with Glitch Border */
+.tt-portrait {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+}
+
+.tt-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 1px solid var(--text-dim);
+    background: #000;
+}
+
+/* Stats Grid */
+.tooltip-stats {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tt-row label {
+    width: 25px;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+}
+
+.stat-bar {
+    flex-grow: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.stat-bar div {
+    height: 100%;
+    background: var(--primary);
+    box-shadow: 0 0 5px var(--primary);
+    transition: width 0.3s ease-out;
+    /* Bar Animation */
+}
+
+.tt-row .val {
+    width: 35px;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #fff;
+    font-family: var(--font-mono);
+}
+
+/* Footer (Potential) */
+.tooltip-footer {
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tooltip-footer label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+}
+
+.tooltip-footer span {
+    font-family: var(--font-head);
+    color: var(--primary);
+    font-size: 1rem;
+}
