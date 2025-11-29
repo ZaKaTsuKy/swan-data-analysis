@@ -420,9 +420,11 @@
         </div>
     </div>
 
-    <!-- ADD THIS AT THE VERY BOTTOM OF BODY, BEFORE SCRIPTS -->
     <!-- EXPLANATION MODAL -->
     <div id="help-modal" class="cyber-modal">
+        <!-- Left Arrow -->
+        <button id="help-prev" class="modal-nav-btn left" onclick="navigateHelp(-1)">❮</button>
+
         <div class="modal-content cyber-card">
             <div class="card-header">
                 <h3><span class="icon">?</span> SYSTEM MANUAL // <span id="help-title"
@@ -438,11 +440,10 @@
 
                 <!-- Right: Text Content -->
                 <div class="help-text">
+                    <!-- Text injected by JS -->
                     <div class="help-section">
                         <h4>// METRIC LOGIC</h4>
-                        <p id="help-metric-text">
-                            [SYSTEM]: Select a visualization to view specific calculation protocols.
-                        </p>
+                        <p id="help-metric-text"></p>
                     </div>
                     <div class="help-section">
                         <h4>// INTERACTION CONTROLS</h4>
@@ -455,13 +456,14 @@
                     </div>
                     <div class="help-section">
                         <h4>// DATA INSIGHT</h4>
-                        <p id="help-insight-text">
-                            This tool visualizes raw data relationships to identify statistical outliers.
-                        </p>
+                        <p id="help-insight-text"></p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Right Arrow -->
+        <button id="help-next" class="modal-nav-btn right" onclick="navigateHelp(1)">❯</button>
     </div>
 
     <!-- Scripts -->
