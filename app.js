@@ -1225,8 +1225,6 @@ function enableParCoordsHover(data) {
 }
 
 // --- HELP SYSTEM LOGIC ---
-// --- HELP SYSTEM LOGIC ---
-
 const HELP_CONTENT = {
     // --- MAIN SECTIONS ---
     'scatter': {
@@ -1469,15 +1467,23 @@ const HELP_CONTENT = {
     }
 };
 
+// --- HELP SYSTEM LOGIC ---
+
+// 1. Define Order of Deep Analytics Tabs
+const ANALYTICS_SEQUENCE = ['tab-corr', 'tab-3d', 'tab-multi', 'tab-pca', 'tab-sun'];
+let currentHelpKey = null; // Track what is currently open
+
 window.openHelp = function (sectionKey) {
     const modal = $('#help-modal');
-    let contentKey = sectionKey;
 
-    // 1. Dynamic check for Analytics tab
+    // 1. Resolve Key
+    let contentKey = sectionKey;
     if (sectionKey === 'analytics') {
+        // If clicked from header, find the active tab
         contentKey = $('.tab-content.active').attr('id');
     }
 
+    currentHelpKey = contentKey; // Store for navigation
     const content = HELP_CONTENT[contentKey];
 
     if (content) {
@@ -1490,83 +1496,73 @@ window.openHelp = function (sectionKey) {
         const containerId = 'modal-chart-replica';
         const $container = $('#' + containerId);
 
-        // CLEANUP
         try { Plotly.purge(containerId); } catch (e) { }
         $container.empty();
 
         if (contentKey === 'leaderboard') {
-            // --- SPECIAL CASE: FULL LEADERBOARD REPLICA ---
-
-            // Start Table Structure with Sticky Header
-            let tableHtml = `
-                <div style="height:100%; overflow:auto; padding-right:5px;">
-                    <table class="cyber-table" style="width:100%; border-collapse:collapse; font-size:0.75rem;">
-                        <thead style="position:sticky; top:0; background:#0b0c11; z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
-                            <tr>
-                                <th style="padding:8px; color:var(--text-dim);">#</th>
-                                <th style="padding:8px; color:var(--primary);">NAME</th>
-                                <th style="padding:8px;">ELM</th>
-                                <th style="padding:8px;">HP</th>
-                                <th style="padding:8px;">ATK</th>
-                                <th style="padding:8px;">DEF</th>
-                                <th style="padding:8px;">SPD</th>
-                                <th style="padding:8px;">EHP</th>
-                                <th style="padding:8px;">TBP</th>
-                                <th style="padding:8px;">ARCH</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            // Loop through ENTIRE dataset
+            // ... (Your existing Table rendering logic) ...
+            let tableHtml = `<div style="height:100%; overflow:auto; padding-right:5px;"><table class="cyber-table" style="width:100%; border-collapse:collapse; font-size:0.75rem;"><thead style="position:sticky; top:0; background:#0b0c11; z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5);"><tr><th style="padding:8px; color:var(--text-dim);">#</th><th style="padding:8px; color:var(--primary);">NAME</th><th style="padding:8px;">ELM</th><th style="padding:8px;">HP</th><th style="padding:8px;">ATK</th><th style="padding:8px;">DEF</th><th style="padding:8px;">SPD</th><th style="padding:8px;">EHP</th><th style="padding:8px;">TBP</th><th style="padding:8px;">ARCH</th></tr></thead><tbody>`;
             State.rawData.forEach(r => {
-                // Formatting Helpers
                 const tbpColor = r.tbp > 90 ? '#00f3ff' : (r.tbp > 70 ? '#fff' : '#666');
                 const imgTag = r.ImageURL ? `<img src="${r.ImageURL}" style="width:20px; height:20px; border-radius:50%; vertical-align:middle; margin-right:5px; border:1px solid #333;">` : '';
-
-                tableHtml += `
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <td style="padding:6px 8px; color:var(--text-dim);">#${r.globalRank}</td>
-                        <td style="padding:6px 8px; color:#fff; white-space:nowrap;">${imgTag}${r.Name}</td>
-                        <td style="padding:6px 8px; color:#ccc;">${r.Element}</td>
-                        <td style="padding:6px 8px; color:var(--text-dim);">${r.HP}</td>
-                        <td style="padding:6px 8px; color:var(--text-dim);">${r.Atk}</td>
-                        <td style="padding:6px 8px; color:var(--text-dim);">${r.Def}</td>
-                        <td style="padding:6px 8px; color:var(--text-dim);">${r.Spd}</td>
-                        <td style="padding:6px 8px; color:#ccc;">${(r.ehp / 1000).toFixed(1)}k</td>
-                        <td style="padding:6px 8px; font-weight:bold; color:${tbpColor};">${r.tbp.toFixed(1)}%</td>
-                        <td style="padding:6px 8px; color:var(--secondary); font-size:0.65rem; letter-spacing:1px;">${r.archetype.toUpperCase()}</td>
-                    </tr>
-                `;
+                tableHtml += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:6px 8px; color:var(--text-dim);">#${r.globalRank}</td><td style="padding:6px 8px; color:#fff; white-space:nowrap;">${imgTag}${r.Name}</td><td style="padding:6px 8px; color:#ccc;">${r.Element}</td><td style="padding:6px 8px; color:var(--text-dim);">${r.HP}</td><td style="padding:6px 8px; color:var(--text-dim);">${r.Atk}</td><td style="padding:6px 8px; color:var(--text-dim);">${r.Def}</td><td style="padding:6px 8px; color:var(--text-dim);">${r.Spd}</td><td style="padding:6px 8px; color:#ccc;">${(r.ehp / 1000).toFixed(1)}k</td><td style="padding:6px 8px; font-weight:bold; color:${tbpColor};">${r.tbp.toFixed(1)}%</td><td style="padding:6px 8px; color:var(--secondary); font-size:0.65rem; letter-spacing:1px;">${r.archetype.toUpperCase()}</td></tr>`;
             });
-
-            tableHtml += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
+            tableHtml += `</tbody></table></div>`;
             $container.html(tableHtml);
-
         } else if (content.chartId) {
-            // --- STANDARD CASE: PLOTLY CHART ---
+            // Plotly Chart
             const sourceChart = document.getElementById(content.chartId);
             if (sourceChart && sourceChart.data) {
                 $container.show();
-                Plotly.newPlot(containerId, sourceChart.data, sourceChart.layout, { responsive: true, displayModeBar: false });
+                Plotly.newPlot(containerId, sourceChart.data, sourceChart.layout, { responsive: true, displayModeBar: true });
             }
+        }
+
+        // 4. Navigation Arrows Logic
+        const navIndex = ANALYTICS_SEQUENCE.indexOf(contentKey);
+        if (navIndex > -1) {
+            // It is part of the sequence, show arrows
+            $('.modal-nav-btn').show();
+        } else {
+            // Standalone chart (e.g., Scatter Plot), hide arrows
+            $('.modal-nav-btn').hide();
         }
     }
 
-    // 4. Show Modal
     modal.addClass('active');
+};
+
+window.navigateHelp = function (direction) {
+    if (!currentHelpKey) return;
+
+    // Find current index in the sequence
+    const currentIndex = ANALYTICS_SEQUENCE.indexOf(currentHelpKey);
+    if (currentIndex === -1) return; // Not in sequence, do nothing
+
+    // Calculate next index (Looping)
+    let nextIndex = currentIndex + direction;
+    if (nextIndex >= ANALYTICS_SEQUENCE.length) nextIndex = 0;
+    if (nextIndex < 0) nextIndex = ANALYTICS_SEQUENCE.length - 1;
+
+    // Get the next ID
+    const nextKey = ANALYTICS_SEQUENCE[nextIndex];
+
+    // OPTIONAL: Update the background dashboard tab too?
+    // switchTab(nextKey); 
+
+    // Open Help for next item
+    openHelp(nextKey);
 };
 
 window.closeHelp = function () {
     $('#help-modal').removeClass('active');
 };
 
-// Close on Escape Key
 $(document).keydown(function (e) {
     if (e.key === "Escape") closeHelp();
+    // Add Keyboard Arrows Support
+    if ($('#help-modal').hasClass('active')) {
+        if (e.key === "ArrowRight") navigateHelp(1);
+        if (e.key === "ArrowLeft") navigateHelp(-1);
+    }
 });
