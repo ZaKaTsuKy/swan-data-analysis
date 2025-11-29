@@ -1147,3 +1147,176 @@ body {
     color: var(--primary);
     font-size: 1rem;
 }
+
+/* --- HELP MODAL SYSTEM --- */
+.cyber-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 11000;
+    /* Above Tooltip (10000) */
+    display: none;
+    /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cyber-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.cyber-modal .modal-content {
+    width: 90%;
+    max-width: 1200px;
+    height: 80vh;
+    border: 1px solid var(--secondary);
+    /* Purple border for Help */
+    box-shadow: 0 0 50px rgba(188, 19, 254, 0.1);
+    background: var(--bg-dark);
+}
+
+.help-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    /* Chart takes 66%, Text takes 33% */
+    gap: 20px;
+    height: 100%;
+    padding: 20px !important;
+}
+
+.help-visual {
+    position: relative;
+    border: 1px dashed var(--text-dim);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.help-text {
+    overflow-y: auto;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.help-section h4 {
+    color: var(--secondary);
+    font-family: var(--font-head);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.help-section p {
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.6;
+    font-family: var(--font-body);
+}
+
+.tech-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tech-list li {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    color: var(--text-dim);
+}
+
+.tech-list span {
+    color: var(--primary);
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* Mobile Modal */
+@media screen and (max-width: 768px) {
+    .cyber-modal {
+        padding: 10px;
+    }
+
+    .help-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+}
+
+/* --- CYBER MATH ENGINE --- */
+.math-block {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    margin: 10px 0;
+    font-family: 'Times New Roman', serif;
+    /* Standard Math Font */
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.math-text {
+    font-family: var(--font-mono);
+    font-style: normal;
+    color: var(--primary);
+    font-size: 0.8rem;
+    margin-right: 5px;
+}
+
+/* Fraction Layout */
+.fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 5px;
+}
+
+.fraction .top {
+    border-bottom: 1px solid #fff;
+    padding: 0 5px;
+    display: block;
+}
+
+.fraction .bottom {
+    padding: 0 5px;
+    display: block;
+}
+
+/* Math Symbols */
+.var {
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+.op {
+    color: var(--text-dim);
+    margin: 0 3px;
+    font-style: normal;
+}
+
+.num {
+    color: var(--primary);
+    font-family: var(--font-mono);
+}
+
+.sigma {
+    font-style: normal;
+}
