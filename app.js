@@ -1063,82 +1063,88 @@ $(document).keydown(function (e) {
 });
 
 // --- SYSTEM: LINKED INTELLIGENCE & TOOLTIPS ---
+// --- SYSTEM: LINKED INTELLIGENCE & TOOLTIPS ---
 const Tooltip = {
     el: $('#cyber-tooltip'),
     img: $('#tt-img'),
     name: $('#tt-name'),
     role: $('#tt-role'),
     star: $('#tt-star'),
-    // New: access the footer label/value directly
     footerLbl: $('.tooltip-footer label'),
     footerVal: $('#tt-tbp'),
-
     vals: { hp: $('#tt-hp'), atk: $('#tt-atk'), def: $('#tt-def'), spd: $('#tt-spd') },
     bars: { hp: $('#bar-hp'), atk: $('#bar-atk'), def: $('#bar-def'), spd: $('#bar-spd') },
 
-    // Added 'customFooter' argument
     show: function (mob, x, y, customFooter = null) {
         if (!mob) return;
 
-        // 1. Basic Info
+        // 1. Fill Data (Same as before)
         this.name.text(mob.Name);
-        this.role.text(mob.archetype.toUpperCase());
-        this.role.css('color', getRoleColor(mob.archetype));
+        this.role.text(mob.archetype.toUpperCase()).css('color', getRoleColor(mob.archetype));
         this.star.text(mob.Stars + "★");
         this.img.attr('src', mob.ImageURL || 'placeholder.png');
 
-        // 2. Footer Logic (Dynamic Switch)
         if (customFooter) {
-            // Show Custom Metric (e.g. Z-Score)
             this.footerLbl.text(customFooter.label);
-            this.footerVal.text(customFooter.value);
-            this.footerVal.css('color', '#bc13fe'); // Purple for Z-Score
+            this.footerVal.text(customFooter.value).css('color', '#bc13fe');
         } else {
-            // Default to Potential
             this.footerLbl.text("POTENTIAL");
-            this.footerVal.text(mob.tbp.toFixed(1) + "%");
-            this.footerVal.css('color', 'var(--primary)');
+            this.footerVal.text(mob.tbp.toFixed(1) + "%").css('color', 'var(--primary)');
         }
 
-        // 3. Stats
         this.vals.hp.text(mob.HP);
         this.vals.atk.text(mob.Atk);
         this.vals.def.text(mob.Def);
         this.vals.spd.text(mob.Spd);
 
-        // 4. Bar Animation
-        const hpP = Math.min((mob.HP / 15000) * 100, 100);
-        const atkP = Math.min((mob.Atk / 1100) * 100, 100);
-        const defP = Math.min((mob.Def / 900) * 100, 100);
-        const spdP = Math.min((mob.Spd / 130) * 100, 100);
+        // Bar Animation
+        const max = { hp: 15000, atk: 1100, def: 900, spd: 130 };
+        this.bars.hp.css('width', Math.min((mob.HP / max.hp) * 100, 100) + '%');
+        this.bars.atk.css('width', Math.min((mob.Atk / max.atk) * 100, 100) + '%');
+        this.bars.def.css('width', Math.min((mob.Def / max.def) * 100, 100) + '%');
+        this.bars.spd.css('width', Math.min((mob.Spd / max.spd) * 100, 100) + '%');
 
-        this.bars.hp.css('width', hpP + '%');
-        this.bars.atk.css('width', atkP + '%');
-        this.bars.def.css('width', defP + '%');
-        this.bars.spd.css('width', spdP + '%');
+        // 2. MOBILE VS DESKTOP POSITIONING
+        if ($(window).width() <= 768) {
+            // Mobile: Dock to bottom via CSS Class
+            this.el.show().addClass('active'); // 'active' triggers transform: translateY(0)
+            this.el.css({ top: 'auto', left: '0', display: 'block' });
+        } else {
+            // Desktop: Follow Mouse
+            this.el.removeClass('active'); // Remove mobile class
+            const winW = $(window).width(), winH = $(window).height();
+            let posX = x + 20, posY = y + 20;
+            if (posX + 300 > winW) posX = x - 310;
+            if (posY + 250 > winH) posY = y - 210;
 
-        // 5. Positioning
-        const winW = $(window).width();
-        const winH = $(window).height();
-        let posX = x + 20;
-        let posY = y + 20;
-
-        if (posX + 300 > winW) posX = x - 310;
-        if (posY + 250 > winH) posY = y - 210;
-
-        this.el.hide().show(0);
-        this.el.css({ top: posY, left: posX, display: 'block' });
+            this.el.hide().show(0).css({ top: posY, left: posX, display: 'block' });
+        }
     },
 
     hide: function () {
-        this.el.hide();
-        // Reset
-        this.bars.hp.css('width', '0%');
-        this.bars.atk.css('width', '0%');
-        this.bars.def.css('width', '0%');
-        this.bars.spd.css('width', '0%');
+        if ($(window).width() <= 768) {
+            // Mobile: Slide down
+            this.el.removeClass('active');
+            // Wait for animation to finish before hiding display? 
+            // Actually, keep display:block so animation plays, just remove active class.
+        } else {
+            this.el.hide();
+        }
+
+        // Reset bars
+        Object.values(this.bars).forEach(b => b.css('width', '0%'));
     }
 };
+
+// Add a Global Click listener to close the mobile tooltip when tapping outside
+$(document).on('click', function (e) {
+    if ($(window).width() <= 768) {
+        // If we clicked outside a chart and outside the tooltip
+        if (!$(e.target).closest('.chart-container').length && !$(e.target).closest('.cyber-tooltip').length) {
+            Tooltip.hide();
+        }
+    }
+});
 
 // --- PARALLEL COORDINATES INTELLIGENCE ENGINE ---
 function enableParCoordsHover(data) {
@@ -1520,11 +1526,11 @@ window.openHelp = function (sectionKey) {
 
         // 4. Navigation Arrows Logic
         const navIndex = ANALYTICS_SEQUENCE.indexOf(contentKey);
+
+        // Force show/hide based on context
         if (navIndex > -1) {
-            // It is part of the sequence, show arrows
-            $('.modal-nav-btn').show();
+            $('.modal-nav-btn').css('display', 'flex'); // Flex is needed for centering text
         } else {
-            // Standalone chart (e.g., Scatter Plot), hide arrows
             $('.modal-nav-btn').hide();
         }
     }
