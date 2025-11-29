@@ -1270,7 +1270,7 @@ const HELP_CONTENT = {
                     <div style="color:var(--secondary); margin-bottom:3px; letter-spacing:1px;">>> SIMULATION: ZERATH</div>
                     <div style="display:grid; grid-template-columns: auto 1fr; gap: 5px 15px;">
                         <span style="color:var(--text-dim);">INPUT:</span> <span style="color:#fff;">15,315 HP & 560 DEF</span>
-                        <span style="color:var(--text-dim);">RESULT:</span> <span style="color:var(--primary); font-weight:bold;">45.3k Effective HP</span>
+                        <span style="color:var(--text-dim);">RESULT:</span> <span style="color:var(--primary); font-weight:bold;">47.5k Effective HP</span>
                     </div>
                 </div>
             </div>
@@ -1572,3 +1572,4 @@ $(document).keydown(function (e) {
         if (e.key === "ArrowLeft") navigateHelp(-1);
     }
 });
+
