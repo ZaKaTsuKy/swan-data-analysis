@@ -674,194 +674,6 @@ body {
 }
 
 /* =========================================
-   MOBILE DEVICES (Max Width: 768px) 
-   ========================================= */
-@media screen and (max-width: 768px) {
-
-    /* --- 1. CORE SCROLLING & POSITIONING --- */
-    body {
-        overflow-y: auto !important;
-        height: auto !important;
-        position: relative;
-    }
-
-    /* --- 2. MENU BUTTON (Floating Top Right) --- */
-    #mobile-menu-btn {
-        display: block !important;
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 1001;
-        width: auto;
-        padding: 10px 15px;
-        background: rgba(5, 8, 12, 0.95);
-        backdrop-filter: blur(5px);
-        border: 1px solid var(--primary);
-        box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-        color: var(--primary);
-    }
-
-    /* --- 3. LAYOUT STACKING --- */
-    .app-container {
-        display: block;
-        height: auto;
-        overflow: visible;
-    }
-
-    .main-content {
-        padding: 80px 15px 20px 15px;
-        height: auto;
-        overflow: visible;
-    }
-
-    /* Grid Sections become Columns */
-    .grid-section,
-    .top-row,
-    .middle-row,
-    .bottom-row {
-        display: flex;
-        flex-direction: column;
-        height: auto !important;
-        min-height: auto !important;
-        gap: 20px;
-    }
-
-    /* --- 4. SIDEBAR DRAWER --- */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        width: 85%;
-        height: 100vh;
-        background: rgba(5, 8, 12, 0.98);
-        border-right: 1px solid var(--primary);
-        z-index: 999;
-        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto;
-    }
-
-    .sidebar.active {
-        left: 0;
-    }
-
-    /* --- 5. GENERAL CARD ADJUSTMENTS --- */
-    .cyber-card {
-        height: auto;
-        min-height: 400px;
-        margin-bottom: 20px;
-    }
-
-    #scatter-container,
-    #inspector-panel {
-        height: 400px !important;
-        min-height: 400px;
-    }
-
-    /* --- 6. DEEP ANALYTICS FIX (The Critical Part) --- */
-
-    /* A. Break the Header Layout: Stack Title & Tabs */
-    .analytics-row .card-header {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 15px;
-        padding-bottom: 0;
-    }
-
-    /* B. Make Tabs Swipeable/Scrollable */
-    .tab-controls {
-        display: flex;
-        width: 100%;
-        overflow-x: auto;
-        /* Enable Horizontal Scroll */
-        white-space: nowrap;
-        gap: 10px;
-        padding-bottom: 10px;
-        /* Space for scrollbar thumb */
-        -webkit-overflow-scrolling: touch;
-        /* Smooth scroll on iOS */
-        scrollbar-width: none;
-        /* Hide scrollbar Firefox */
-    }
-
-    .tab-controls::-webkit-scrollbar {
-        display: none;
-        /* Hide scrollbar Chrome/Safari */
-    }
-
-    .cyber-tab {
-        flex: 0 0 auto;
-        /* Stop buttons from shrinking */
-        padding: 10px 20px;
-        background: rgba(0, 243, 255, 0.05);
-        border: 1px solid var(--text-dim);
-    }
-
-    .cyber-tab.active {
-        background: var(--primary);
-        color: #000;
-        text-shadow: none;
-    }
-
-    /* C. Analytics Split Layout (Chart vs Info) */
-    .analytics-row {
-        height: auto !important;
-    }
-
-    .analytics-split {
-        display: flex;
-        flex-direction: column;
-        /* Stack Chart Top, Info Bottom */
-        height: auto;
-    }
-
-    /* D. Force Chart Height */
-    .analytics-split>div:first-child {
-        height: 450px !important;
-        /* Give charts plenty of room */
-        min-height: 450px;
-        width: 100%;
-        position: relative;
-    }
-
-    /* E. Info Panel Styling */
-    .chart-info-panel {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        /* Limit height so page isn't infinite */
-        overflow-y: auto;
-        border-left: none;
-        border-top: 1px solid var(--primary);
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    /* --- 7. TABLE & OTHER FIXES --- */
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .metric-tile[style*="span 1.5"] {
-        grid-column: span 2 !important;
-    }
-
-    /* Entity Portrait size */
-    .portrait-container img {
-        width: 60px;
-        height: 60px;
-    }
-
-    .table-wrapper {
-        max-height: 500px;
-        overflow-x: auto;
-    }
-
-    .cyber-table {
-        min-width: 600px;
-    }
-}
-
-/* =========================================
    UNIVERSAL FULLSCREEN SYSTEM
    ========================================= */
 
@@ -925,19 +737,6 @@ body {
 .cyber-card.fullscreen .inspector-layout .analysis-container {
     flex-grow: 1;
     /* Let radar chart grow huge */
-}
-
-/* --- MOBILE OPTIMIZATION --- */
-@media screen and (max-width: 768px) {
-    .cyber-card.fullscreen .card-body {
-        padding: 10px;
-        overflow-y: auto;
-        /* Allow scrolling content inside fullscreen on mobile */
-    }
-
-    .cyber-card.fullscreen .inspector-layout {
-        height: auto;
-    }
 }
 
 /* --- LEADERBOARD SCROLL FIX --- */
@@ -1242,18 +1041,6 @@ body {
     margin-right: 10px;
 }
 
-/* Mobile Modal */
-@media screen and (max-width: 768px) {
-    .cyber-modal {
-        padding: 10px;
-    }
-
-    .help-layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-}
-
 /* --- CYBER MATH ENGINE --- */
 .math-block {
     background: rgba(0, 0, 0, 0.5);
@@ -1354,21 +1141,257 @@ body {
     right: 2%;
 }
 
-/* Mobile Adjustment: Move arrows to bottom or make smaller */
+/* ==========================================================================
+   MOBILE OS ENGINE v5.0 (Tactical Touch Interface)
+   ========================================================================== */
 @media screen and (max-width: 768px) {
-    .modal-nav-btn {
-        padding: 10px 5px;
-        font-size: 1.5rem;
+
+    /* --- 1. CORE LAYOUT --- */
+    body {
+        overflow-x: hidden;
+        /* Prevent horizontal wobble */
+        padding-top: 60px;
+        /* Space for the fixed menu button */
+    }
+
+    .app-container {
+        display: block;
+        /* Stack Sidebar & Main */
+    }
+
+    .main-content {
+        padding: 15px;
+        gap: 20px;
+    }
+
+    /* --- 2. TACTICAL SIDEBAR (Drawer) --- */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        /* Hide off-screen */
+        width: 85%;
+        height: 100vh;
+        z-index: 20000;
+        /* Highest priority */
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        border-right: 1px solid var(--primary);
+        box-shadow: 10px 0 50px #000;
+        transform: translateX(0);
+    }
+
+    .sidebar.active {
+        left: 0;
+        transform: translateX(0);
+    }
+
+    /* Floating Menu Button */
+    #mobile-menu-btn {
+        display: block !important;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 20001;
+        /* Above sidebar */
+        width: auto;
+        padding: 8px 16px;
+        backdrop-filter: blur(10px);
         background: rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 15px var(--primary);
+    }
+
+    /* --- 3. RESPONSIVE CARDS & CHARTS --- */
+    .cyber-card {
+        min-height: 400px;
+        /* Ensure charts have space */
+        clip-path: none;
+        /* Simplify rendering for mobile perf */
+        border-radius: 4px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        /* Stack Title and Controls */
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    /* Header Layout: Title Row + Button Row */
+    .card-header>div {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Deep Analytics Header Special */
+    .analytics-header {
+        display: block;
+        /* Break flex context */
+    }
+
+    .analytics-header .header-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    /* Scrollable Tab Bar (Swipeable Pill List) */
+    .tab-controls {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 10px;
+        margin-bottom: 5px;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px;
+    }
+
+    /* Hide Scrollbar but keep functionality */
+    .tab-controls::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cyber-tab {
+        flex: 0 0 auto;
+        /* Don't shrink */
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    /* Stack the Analytics Split View */
+    .analytics-split {
+        grid-template-columns: 1fr;
+        grid-template-rows: 350px auto;
+        /* Chart fixed height, text auto */
+    }
+
+    /* Info Panel fits below */
+    .chart-info-panel {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        max-height: 300px;
+        /* Scrollable text area */
+    }
+
+    /* --- 4. GRID SYSTEM FLATTENING --- */
+    .grid-section,
+    .top-row,
+    .middle-row,
+    .bottom-row {
+        grid-template-columns: 1fr;
+        /* Force single column */
+        height: auto !important;
+    }
+
+    /* Inspector & Scatter Height Fixes */
+    #scatter-container,
+    #inspector-panel {
+        height: 450px !important;
+    }
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* 2 cols instead of 3 */
+    }
+
+    .metric-tile[style*="span 1.5"] {
+        grid-column: span 2 !important;
+        /* Full width for big numbers */
+    }
+
+    /* --- 5. DATA TABLES --- */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .cyber-table {
+        min-width: 600px;
+        /* Force scroll */
+    }
+
+    /* --- 6. MOBILE TOOLTIP (DOCKED CARD) --- */
+    /* Instead of floating under finger, it docks at bottom */
+    .cyber-tooltip {
+        position: fixed !important;
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        width: 100% !important;
+        border-radius: 10px 10px 0 0;
+        border: none;
+        border-top: 2px solid var(--primary);
+        box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.8);
+        transform: translateY(100%);
+        /* Start hidden down */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 25000;
+    }
+
+    /* Animation class handled by JS */
+    .cyber-tooltip.active {
+        transform: translateY(0);
+    }
+
+    /* --- 7. HELP MODAL ADJUSTMENTS --- */
+    .cyber-modal {
+        padding: 0;
+        backdrop-filter: blur(15px);
+        /* Heavier blur on mobile */
+    }
+
+    .cyber-modal .modal-content {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 0;
+    }
+
+    .help-layout {
+        display: flex;
+        flex-direction: column;
+        padding: 10px !important;
+    }
+
+    .help-visual {
+        height: 40%;
+        /* Chart takes top 40% */
+        flex-shrink: 0;
+    }
+
+    .help-text {
+        height: 60%;
+        /* Text takes bottom 60% */
+        overflow-y: auto;
+        padding-top: 15px;
+    }
+
+    /* Big Navigation Buttons for Help */
+    .modal-nav-btn {
+        top: auto;
+        bottom: 20px;
+        background: var(--primary);
+        color: #000;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        display: flex;
+        /* Flex to center arrow */
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 0 20px var(--primary);
+        border: 2px solid #fff;
     }
 
     .modal-nav-btn.left {
-        left: 0;
-        border-left: none;
+        left: 20px;
     }
 
     .modal-nav-btn.right {
-        right: 0;
-        border-right: none;
+        right: 20px;
     }
 }
