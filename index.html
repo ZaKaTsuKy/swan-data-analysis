@@ -92,12 +92,16 @@
 
                 <!-- Scatter Plot Card -->
                 <div class="cyber-card" id="scatter-container">
+
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
                         <h3><span class="icon">✣</span> SCATTER PLOT</h3>
-                        <!-- Universal Fullscreen Button -->
-                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
-                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="cyber-btn" onclick="openHelp('scatter')"
+                                style="width:auto; padding:5px 12px; margin:0; border-color:var(--secondary); color:var(--secondary);">?</button>
+                            <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                                style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div id="main-scatter" class="chart-container"></div>
@@ -109,8 +113,12 @@
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
                         <h3><span class="icon">◎</span> ENTITY INSPECTOR</h3>
-                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
-                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="cyber-btn" onclick="openHelp('inspector')"
+                                style="width:auto; padding:5px 12px; margin:0; border-color:var(--secondary); color:var(--secondary);">?</button>
+                            <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                                style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <!-- Content injected by JS -->
@@ -129,8 +137,12 @@
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>STAT DISTRIBUTION (Z-SCORE)</h3>
-                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
-                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="cyber-btn" onclick="openHelp('distribution')"
+                                style="width:auto; padding:5px 12px; margin:0; border-color:var(--secondary); color:var(--secondary);">?</button>
+                            <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                                style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div id="box-plot" class="chart-container"></div>
@@ -142,8 +154,12 @@
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>POTENTIAL DENSITY</h3>
-                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
-                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="cyber-btn" onclick="openHelp('density')"
+                                style="width:auto; padding:5px 12px; margin:0; border-color:var(--secondary); color:var(--secondary);">?</button>
+                            <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                                style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div id="hist-plot" class="chart-container"></div>
@@ -170,9 +186,17 @@
                                 <button class="cyber-tab" onclick="switchTab('tab-sun')">TAXONOMY</button>
                             </div>
 
-                            <!-- Fullscreen Toggle Button -->
+                            <!-- NEW: EXPLANATION BUTTON -->
+                            <button class="cyber-btn" onclick="openHelp('analytics')"
+                                style="width:auto; padding:5px 12px; margin:0; font-size:1.1rem; line-height:1; border-color:var(--secondary); color:var(--secondary);">
+                                ?
+                            </button>
+
+                            <!-- Fullscreen Button -->
                             <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
-                                style="width:auto; padding:5px 10px; margin:0; font-size:1.2rem; line-height:1;">⛶</button>
+                                style="width:auto; padding:5px 10px; margin:0; font-size:1.2rem; line-height:1;">
+                                ⛶
+                            </button>
                         </div>
                     </div>
 
@@ -302,8 +326,12 @@
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
                         <h3>GLOBAL LEADERBOARD</h3>
-                        <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
-                            style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="cyber-btn" onclick="openHelp('leaderboard')"
+                                style="width:auto; padding:5px 12px; margin:0; border-color:var(--secondary); color:var(--secondary);">?</button>
+                            <button class="cyber-btn fs-btn" onclick="toggleCardFullscreen(this)"
+                                style="width:auto; padding:5px 10px; margin:0; line-height:1;">⛶</button>
+                        </div>
                     </div>
                     <div class="card-body table-wrapper">
                         <table id="data-table" class="cyber-table">
@@ -389,6 +417,50 @@
         <div class="tooltip-footer">
             <label>POTENTIAL</label>
             <span id="tt-tbp">0%</span>
+        </div>
+    </div>
+
+    <!-- ADD THIS AT THE VERY BOTTOM OF BODY, BEFORE SCRIPTS -->
+    <!-- EXPLANATION MODAL -->
+    <div id="help-modal" class="cyber-modal">
+        <div class="modal-content cyber-card">
+            <div class="card-header">
+                <h3><span class="icon">?</span> SYSTEM MANUAL // <span id="help-title"
+                        style="color:var(--secondary)">ANALYSIS</span></h3>
+                <button class="cyber-btn" onclick="closeHelp()"
+                    style="width:auto; padding:5px 10px; margin:0;">✖</button>
+            </div>
+            <div class="modal-body help-layout">
+                <!-- Left: Visual Reference -->
+                <div class="help-visual">
+                    <div id="modal-chart-replica" class="chart-container"></div>
+                </div>
+
+                <!-- Right: Text Content -->
+                <div class="help-text">
+                    <div class="help-section">
+                        <h4>// METRIC LOGIC</h4>
+                        <p id="help-metric-text">
+                            [SYSTEM]: Select a visualization to view specific calculation protocols.
+                        </p>
+                    </div>
+                    <div class="help-section">
+                        <h4>// INTERACTION CONTROLS</h4>
+                        <ul class="tech-list">
+                            <li><span>🖱 ZOOM:</span> Scroll Wheel / Pinch</li>
+                            <li><span>✥ PAN:</span> Click & Drag</li>
+                            <li><span>◎ INSPECT:</span> Hover over data points for details</li>
+                            <li><span>⟲ RESET:</span> Double-click background</li>
+                        </ul>
+                    </div>
+                    <div class="help-section">
+                        <h4>// DATA INSIGHT</h4>
+                        <p id="help-insight-text">
+                            This tool visualizes raw data relationships to identify statistical outliers.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
