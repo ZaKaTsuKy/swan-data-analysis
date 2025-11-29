@@ -335,6 +335,63 @@
         <div style="margin-top: 20px; color: var(--primary);">LOADING LOCAL DATASET...</div>
     </div>
 
+    <!-- FLOATING HOLOGRAPHIC CARD -->
+    <div id="cyber-tooltip" class="cyber-tooltip">
+        <div class="tooltip-scanline"></div> <!-- Animated Scan Line -->
+
+        <div class="tooltip-header">
+            <div style="display:flex; flex-direction:column;">
+                <span id="tt-name" class="tt-title">UNIT_NAME</span>
+                <span id="tt-role" class="tt-subtitle">ARCHETYPE</span>
+            </div>
+            <span id="tt-star" class="tt-star">5★</span>
+        </div>
+
+        <div class="tooltip-body">
+            <div class="tt-portrait">
+                <img id="tt-img" src="" alt="NO IMG">
+                <div class="img-overlay"></div>
+            </div>
+
+            <div class="tooltip-stats">
+                <!-- Added data-label for CSS animations -->
+                <div class="tt-row">
+                    <label>HP</label>
+                    <div class="stat-bar">
+                        <div id="bar-hp" style="width:0%"></div>
+                    </div>
+                    <span id="tt-hp" class="val">0</span>
+                </div>
+                <div class="tt-row">
+                    <label>ATK</label>
+                    <div class="stat-bar">
+                        <div id="bar-atk" style="width:0%"></div>
+                    </div>
+                    <span id="tt-atk" class="val">0</span>
+                </div>
+                <div class="tt-row">
+                    <label>DEF</label>
+                    <div class="stat-bar">
+                        <div id="bar-def" style="width:0%"></div>
+                    </div>
+                    <span id="tt-def" class="val">0</span>
+                </div>
+                <div class="tt-row">
+                    <label>SPD</label>
+                    <div class="stat-bar">
+                        <div id="bar-spd" style="width:0%"></div>
+                    </div>
+                    <span id="tt-spd" class="val">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tooltip-footer">
+            <label>POTENTIAL</label>
+            <span id="tt-tbp">0%</span>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="dataset.js"></script>
     <script src="app.js"></script>
