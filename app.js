@@ -1223,3 +1223,350 @@ function enableParCoordsHover(data) {
 
     container.onmouseleave = () => Tooltip.hide();
 }
+
+// --- HELP SYSTEM LOGIC ---
+// --- HELP SYSTEM LOGIC ---
+
+const HELP_CONTENT = {
+    // --- MAIN SECTIONS ---
+    'scatter': {
+        title: "SCATTER PLOT // METRICS",
+        chartId: "main-scatter",
+        metric: `
+            <div class="math-block" style="flex-direction:column; align-items:flex-start; gap:15px;">
+                <!-- EHP FORMULA -->
+                <div style="display:flex; align-items:center; white-space:nowrap;">
+                    <span class="math-text">EHP = </span>
+                    <span class="var" style="margin-left:5px;">HP</span>
+                    <span class="op">×</span>
+                    <span class="fraction">
+                        <span class="top"><span class="num">1000</span> <span class="op">+</span> (<span class="num">3.5</span> <span class="op">×</span> <span class="var">DEF</span>)</span>
+                        <span class="bottom"><span class="num">1000</span></span>
+                    </span>
+                </div>
+                
+                <!-- POTENTIAL FORMULA -->
+                <div style="display:flex; align-items:center; white-space:nowrap; font-size:0.85rem;">
+                    <span class="math-text">Potential % = </span>
+                    <span class="fraction">
+                        <span class="top">N<sub class="num">hp</sub> <span class="op">+</span> N<sub class="num">atk</sub> <span class="op">+</span> N<sub class="num">def</sub> <span class="op">+</span> N<sub class="num">spd</sub></span>
+                        <span class="bottom"><span class="num">4</span></span>
+                    </span>
+                    <span class="op">×</span> <span class="num">100</span>
+                </div>
+            </div>
+        `,
+        insight: `
+            <div style="margin-bottom: 25px;">
+                <strong style="color:var(--primary); display:block; margin-bottom:5px; font-family:var(--font-head); letter-spacing:1px; border-bottom:1px solid rgba(0,243,255,0.2); padding-bottom:2px;">/// Y-AXIS: EFFECTIVE HP</strong>
+                <div style="margin-bottom:10px; color:#ddd; font-size:0.85rem; line-height:1.5;">
+                    Measures raw survival capability by normalizing HP against Defense. It answers: <em>"How much HP would this unit need if it had 0 DEF?"</em>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); padding:10px; border-left:2px solid var(--secondary); font-size:0.8rem; font-family:var(--font-mono);">
+                    <div style="color:var(--secondary); margin-bottom:3px; letter-spacing:1px;">>> SIMULATION: ZERATH</div>
+                    <div style="display:grid; grid-template-columns: auto 1fr; gap: 5px 15px;">
+                        <span style="color:var(--text-dim);">INPUT:</span> <span style="color:#fff;">15,315 HP & 560 DEF</span>
+                        <span style="color:var(--text-dim);">RESULT:</span> <span style="color:var(--primary); font-weight:bold;">45.3k Effective HP</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <strong style="color:var(--primary); display:block; margin-bottom:5px; font-family:var(--font-head); letter-spacing:1px; border-bottom:1px solid rgba(0,243,255,0.2); padding-bottom:2px;">/// X-AXIS: BASE POTENTIAL</strong>
+                <div style="margin-bottom:8px; color:#ddd; font-size:0.85rem; line-height:1.5;">
+                    The average of all 4 stats normalized against the dataset maximums. A <span style="color:var(--primary); font-weight:bold;">100%</span> score implies the unit is "Best in Slot" for every single stat category.
+                </div>
+            </div>
+            
+            <div style="margin-top:auto; padding-top:10px; border-top:1px dashed var(--text-dim); text-align:center; font-family:var(--font-mono); font-size:0.8rem; color:var(--primary);">
+                🡵 TOP RIGHT SECTOR = OPTIMAL STAT REPARTITION
+            </div>
+        `
+    },
+
+    'inspector': {
+        title: "ENTITY INSPECTOR",
+        chartId: "radar-container",
+        metric: "",
+        insight: `
+            <div style="margin-bottom:15px;">
+                <strong style="color:var(--primary); font-family:var(--font-head);">/// RADAR SIGNATURE</strong>
+                <p style="color:#ccc; font-size:0.85rem; margin-top:5px;">
+                    Visualizes the selected entity's raw stats (Blue) compared to the average performance of other units with the same Star Grade (Grey Dashed Line).
+                </p>
+            </div>
+            <div style="font-size:0.8rem; font-family:var(--font-mono); color:var(--text-dim);">
+                <span style="color:var(--secondary);">>> ANALYSIS:</span> Spikes indicate specialization. A shape that fully engulfs the grey line indicates a statistically superior unit.
+            </div>
+        `
+    },
+
+    'distribution': {
+        title: "STATISTICS // Z-SCORE",
+        chartId: "box-plot",
+        metric: `
+            <div class="math-block" style="flex-direction:column; gap:15px;">
+                <!-- Z-Score -->
+                <div>
+                    <span class="math-text">Z-Score = </span>
+                    <span class="fraction">
+                        <span class="top"><span class="var">x</span> <span class="op">-</span> <span class="var">μ</span></span>
+                        <span class="bottom"><span class="var">σ</span></span>
+                    </span>
+                </div>
+                <!-- Normal Distribution -->
+                <div>
+                    <span class="math-text">ƒ(x) = </span>
+                    <span class="fraction">
+                        <span class="top"><span class="num">1</span></span>
+                        <span class="bottom"><span class="var">σ</span><span class="op">√</span><span class="num">2π</span></span>
+                    </span>
+                    <span class="var">e</span>
+                    <sup>-½ Z²</sup>
+                </div>
+            </div>
+        `,
+        insight: `
+            <strong style="color:var(--primary); display:block; margin-bottom:8px; font-family:var(--font-head);">/// STANDARD DEVIATION (σ)</strong>
+            <p style="color:#ddd; font-size:0.85rem; line-height:1.5;">
+                The Z-Score measures rarity. It tells us how many "Standard Deviations" a unit's speed is from the average.
+            </p>
+            <ul class="tech-list" style="margin-top:15px;">
+                <li><span style="color:#fff;">0.00 σ</span> : Exact Average</li>
+                <li><span style="color:var(--primary);">+1.00 σ</span> : Faster than 84%</li>
+                <li><span style="color:var(--secondary);">+2.00 σ</span> : Faster than 97% (Elite)</li>
+                <li><span style="color:var(--text-dim);">-2.00 σ</span> : Bottom 2% (Very Slow)</li>
+            </ul>
+        `
+    },
+
+    'density': {
+        title: "POTENTIAL DENSITY",
+        chartId: "hist-plot",
+        metric: "",
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// FREQUENCY DISTRIBUTION</strong>
+            <p style="color:#ddd; font-size:0.85rem; margin-top:5px;">
+                A Histogram showing the count of monsters at each Total Base Potential (TBP) tier.
+            </p>
+            <div style="margin-top:15px; font-size:0.8rem; font-family:var(--font-mono); color:var(--text-dim);">
+                <span style="color:var(--secondary);">>> INTERPRETATION:</span><br>
+                A skew to the right indicates an account with high rune/unit quality.
+            </div>
+        `
+    },
+
+    'leaderboard': {
+        title: "GLOBAL DATA GRID",
+        chartId: null,
+        metric: "",
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// RAW DATA MATRIX</strong>
+            <p style="color:#ddd; font-size:0.85rem; margin-top:5px;">
+                The raw source of truth for all visualizations. Clicking headers sorts the dataset.
+            </p>
+            <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px; font-size:0.8rem; font-family:var(--font-mono);">
+                <div><span style="color:var(--primary);">TBP:</span> Total Base Potential</div>
+                <div><span style="color:var(--primary);">EHP:</span> Effective HP</div>
+            </div>
+        `
+    },
+
+    // --- DEEP ANALYTICS TABS ---
+    'tab-corr': {
+        title: "CORRELATION // PEARSON R",
+        chartId: "heatmap-plot",
+        metric: `
+            <div class="math-block">
+                <span class="var">r</span> <span class="op">=</span>
+                <span class="fraction">
+                    <span class="top">cov(<span class="var">X</span>,<span class="var">Y</span>)</span>
+                    <span class="bottom">σ<sub class="var">X</sub> σ<sub class="var">Y</sub></span>
+                </span>
+            </div>
+        `,
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// STATISTIC RELATIONSHIPS</strong>
+            <div style="margin-top:10px; display:grid; gap:10px;">
+                <div style="background:rgba(255,236,0,0.1); padding:8px; border-left:2px solid #ffec00;">
+                    <strong style="color:#ffec00;">POSITIVE (1.0)</strong><br>
+                    <span style="font-size:0.8rem; color:#ddd;">As X goes UP, Y goes UP.<br>(e.g. HP usually correlates with EHP)</span>
+                </div>
+                <div style="background:rgba(0,31,63,0.3); padding:8px; border-left:2px solid #00f3ff;">
+                    <strong style="color:#00f3ff;">NEGATIVE (-1.0)</strong><br>
+                    <span style="font-size:0.8rem; color:#ddd;">As X goes UP, Y goes DOWN.<br>(e.g. High Speed often costs HP)</span>
+                </div>
+            </div>
+        `
+    },
+    'tab-3d': {
+        title: "3D CLUSTER // REGRESSION PLANE",
+        chartId: "cluster-plot",
+        metric: `
+            <div class="math-block">
+                <span class="var">DEF</span> <span class="op">=</span> <span class="num">b</span><sub>0</sub> <span class="op">+</span> 
+                <span class="num">b</span><sub>1</sub><span class="var">HP</span> <span class="op">+</span> 
+                <span class="num">b</span><sub>2</sub><span class="var">ATK</span> <span class="op">+</span> 
+                <span class="num">b</span><sub>3</sub><span class="var">SPD</span>
+            </div>
+        `,
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// STAT BUDGET REVERSE-ENGINEERING</strong>
+            <p style="color:#ddd; font-size:0.85rem; margin-top:5px;">
+                We perform a <strong>Multivariate Linear Regression</strong> to find the "Balance Formula" used by the developers. 
+            </p>
+            <div style="margin-top:15px; font-size:0.8rem; font-family:var(--font-mono); color:var(--text-dim);">
+                <span style="color:var(--secondary);">>> VISUAL:</span> Rotate the cube to find the flat "Planes" where monsters align.
+            </div>
+        `
+    },
+    'tab-multi': {
+        title: "MULTIVARIATE // PARALLEL AXES",
+        chartId: "parallel-plot",
+        metric: "Normalized Axis Projection",
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// HIGH-DIMENSIONAL VIEW</strong>
+            <p style="color:#ddd; font-size:0.85rem; margin-top:5px;">
+                Each line represents one monster passing through normalized axes. 
+            </p>
+            <ul class="tech-list" style="margin-top:10px;">
+                <li><span style="color:#fff;">Top Horizontal:</span> Perfect All-Rounder</li>
+                <li><span style="color:#fff;">Zig-Zag:</span> Min-Maxed Specialist</li>
+            </ul>
+            <div style="margin-top:10px; font-size:0.8rem; font-family:var(--font-mono); color:var(--secondary);">
+                >> HOVER lines to identify units.
+            </div>
+        `
+    },
+    'tab-pca': {
+        title: "AI META MAP // PCA",
+        chartId: "pca-plot",
+        metric: "Eigenvector Decomposition",
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// UNSUPERVISED LEARNING</strong>
+            <p style="color:#ddd; font-size:0.85rem; margin-top:5px;">
+                <strong>PCA</strong> compresses 4D stats into 2D coordinates. 
+                <strong>K-Means</strong> then colors them by mathematical similarity.
+            </p>
+            <div style="margin-top:15px; font-size:0.8rem; font-family:var(--font-mono); color:var(--text-dim);">
+                <span style="color:var(--secondary);">>> INSIGHT:</span> This reveals "True Roles" ignoring in-game labels.
+            </div>
+        `
+    },
+    'tab-sun': {
+        title: "TAXONOMY // HIERARCHY",
+        chartId: "sunburst-plot",
+        metric: "Tree Map Aggregation",
+        insight: `
+            <strong style="color:var(--primary); font-family:var(--font-head);">/// ACCOUNT COMPOSITION</strong>
+            <p style="color:#ddd; font-size:0.85rem; margin-top:5px;">
+                Visualizes the density of Element > Archetype. This creates a "Fingerprint" of your account's diversity.
+            </p>
+            <div style="margin-top:10px; font-size:0.8rem; font-family:var(--font-mono); color:var(--secondary);">
+                >> CLICK slices to drill down.
+            </div>
+        `
+    }
+};
+
+window.openHelp = function (sectionKey) {
+    const modal = $('#help-modal');
+    let contentKey = sectionKey;
+
+    // 1. Dynamic check for Analytics tab
+    if (sectionKey === 'analytics') {
+        contentKey = $('.tab-content.active').attr('id');
+    }
+
+    const content = HELP_CONTENT[contentKey];
+
+    if (content) {
+        // 2. Set Text
+        $('#help-title').text(content.title);
+        $('#help-metric-text').html(content.metric);
+        $('#help-insight-text').html(content.insight);
+
+        // 3. Handle Visuals
+        const containerId = 'modal-chart-replica';
+        const $container = $('#' + containerId);
+
+        // CLEANUP
+        try { Plotly.purge(containerId); } catch (e) { }
+        $container.empty();
+
+        if (contentKey === 'leaderboard') {
+            // --- SPECIAL CASE: FULL LEADERBOARD REPLICA ---
+
+            // Start Table Structure with Sticky Header
+            let tableHtml = `
+                <div style="height:100%; overflow:auto; padding-right:5px;">
+                    <table class="cyber-table" style="width:100%; border-collapse:collapse; font-size:0.75rem;">
+                        <thead style="position:sticky; top:0; background:#0b0c11; z-index:10; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
+                            <tr>
+                                <th style="padding:8px; color:var(--text-dim);">#</th>
+                                <th style="padding:8px; color:var(--primary);">NAME</th>
+                                <th style="padding:8px;">ELM</th>
+                                <th style="padding:8px;">HP</th>
+                                <th style="padding:8px;">ATK</th>
+                                <th style="padding:8px;">DEF</th>
+                                <th style="padding:8px;">SPD</th>
+                                <th style="padding:8px;">EHP</th>
+                                <th style="padding:8px;">TBP</th>
+                                <th style="padding:8px;">ARCH</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Loop through ENTIRE dataset
+            State.rawData.forEach(r => {
+                // Formatting Helpers
+                const tbpColor = r.tbp > 90 ? '#00f3ff' : (r.tbp > 70 ? '#fff' : '#666');
+                const imgTag = r.ImageURL ? `<img src="${r.ImageURL}" style="width:20px; height:20px; border-radius:50%; vertical-align:middle; margin-right:5px; border:1px solid #333;">` : '';
+
+                tableHtml += `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:6px 8px; color:var(--text-dim);">#${r.globalRank}</td>
+                        <td style="padding:6px 8px; color:#fff; white-space:nowrap;">${imgTag}${r.Name}</td>
+                        <td style="padding:6px 8px; color:#ccc;">${r.Element}</td>
+                        <td style="padding:6px 8px; color:var(--text-dim);">${r.HP}</td>
+                        <td style="padding:6px 8px; color:var(--text-dim);">${r.Atk}</td>
+                        <td style="padding:6px 8px; color:var(--text-dim);">${r.Def}</td>
+                        <td style="padding:6px 8px; color:var(--text-dim);">${r.Spd}</td>
+                        <td style="padding:6px 8px; color:#ccc;">${(r.ehp / 1000).toFixed(1)}k</td>
+                        <td style="padding:6px 8px; font-weight:bold; color:${tbpColor};">${r.tbp.toFixed(1)}%</td>
+                        <td style="padding:6px 8px; color:var(--secondary); font-size:0.65rem; letter-spacing:1px;">${r.archetype.toUpperCase()}</td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            $container.html(tableHtml);
+
+        } else if (content.chartId) {
+            // --- STANDARD CASE: PLOTLY CHART ---
+            const sourceChart = document.getElementById(content.chartId);
+            if (sourceChart && sourceChart.data) {
+                $container.show();
+                Plotly.newPlot(containerId, sourceChart.data, sourceChart.layout, { responsive: true, displayModeBar: false });
+            }
+        }
+    }
+
+    // 4. Show Modal
+    modal.addClass('active');
+};
+
+window.closeHelp = function () {
+    $('#help-modal').removeClass('active');
+};
+
+// Close on Escape Key
+$(document).keydown(function (e) {
+    if (e.key === "Escape") closeHelp();
+});
